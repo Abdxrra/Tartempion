@@ -33,6 +33,12 @@ from indicateurs import Indicateur
 
 # Définir le nombre de questions
 NB_QUESTIONS: int = 21
+NOM_FICHIER_SON_VICTOIRE = '522243__dzedenz__result-10.wav'
+NOM_FICHIER_SON_ERREUR = '409282__wertstahl__syserr1v1-in_thy_face_short.wav'
+NOM_FICHIER_SON_FIN_PARTIE = '173859__jivatma07__j1game_over_mono.wav'
+NOM_FICHIER_MUSIQUE_QUESTIONS = '550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav'
+
+NB_QUESTIONS = 21
 
 TITRE = 'TITRE'
 TEMPS = 'TEMPS'
@@ -181,7 +187,7 @@ def programme_principal() -> None:
     # Tant qu'on ne quitte pas le jeu, fait cela
     while not quitter:
         event, valeurs = fenetre.read(timeout=10)
-        
+
         # Si le décompte est actif, on diminue le temps restant et on met à jour le UI
         if decompte_actif:
             dernier_temps = temps_actuel
