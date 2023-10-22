@@ -22,7 +22,7 @@ Ressources sous licences:
 """
 
 import random
-import simpleaudio as sa
+# import simpleaudio as sa
 import time
 import sqlite3 as squirrel
 import PySimpleGUI as gui
@@ -86,10 +86,10 @@ def afficher_jeu() -> gui.Window:
 
 
 def effacer_question_affichee(fenetre: gui.Window) -> None:
-    fenetre['BOUTON-GAUCHE'].update('', disabled=True, visible=True)
+    fenetre[BOUTON_GAUCHE].update('', disabled=True, visible=True)
     fenetre[QUESTION].update("")
     fenetre[OU].update(text_color=gui.theme_background_color())
-    fenetre['BOUTON-DROIT'].update('', disabled=True, visible=True)
+    fenetre[BOUTON_DROIT].update('', disabled=True, visible=True)
 
 
 def charger_questions(fichier_db: str) -> list:
@@ -124,15 +124,15 @@ def splasher_succes() -> None:
 def afficher(fenetre: gui.Window, question: tuple) -> None:
     fenetre[QUESTION].update(question[0])
     reponses = melanger_reponses((question[1], question[2]))
-    fenetre['BOUTON-GAUCHE'].update(reponses[0], disabled=False, visible=True)
+    fenetre[BOUTON_GAUCHE].update(reponses[0], disabled=False, visible=True)
     fenetre[OU].update(text_color='white')
-    fenetre['BOUTON-DROIT'].update(reponses[1], disabled=False, visible=True)
+    fenetre[BOUTON_DROIT].update(reponses[1], disabled=False, visible=True)
 
 def effacer_question(fenetre: gui.Window) -> None:
     fenetre[QUESTION].update('')
-    fenetre['BOUTON-GAUCHE'].update('', disabled=True, visible=True)
+    fenetre[BOUTON_GAUCHE].update('', disabled=True, visible=True)
     fenetre[OU].update(text_color=gui.theme_background_color())
-    fenetre['BOUTON-DROIT'].update('', disabled=True, visible=True)
+    fenetre[BOUTON_DROIT].update('', disabled=True, visible=True)
 
 
 def programme_principal() -> None:
@@ -140,10 +140,10 @@ def programme_principal() -> None:
 
     gui.theme('Black')
 
-    son_victoire = sa.WaveObject.from_wave_file('522243__dzedenz__result-10.wav')
-    son_erreur = sa.WaveObject.from_wave_file('409282__wertstahl__syserr1v1-in_thy_face_short.wav')
-    son_fin_partie = sa.WaveObject.from_wave_file('173859__jivatma07__j1game_over_mono.wav')
-    musique_questions = sa.WaveObject.from_wave_file('550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav')
+    # son_victoire = sa.WaveObject.from_wave_file('522243__dzedenz__result-10.wav')
+    # son_erreur = sa.WaveObject.from_wave_file('409282__wertstahl__syserr1v1-in_thy_face_short.wav')
+    # son_fin_partie = sa.WaveObject.from_wave_file('173859__jivatma07__j1game_over_mono.wav')
+    # musique_questions = sa.WaveObject.from_wave_file('550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav')
 
     splasher_equipe(1500)
     splacher_titre(2000, True)
@@ -160,8 +160,8 @@ def programme_principal() -> None:
     while not quitter:
         event, valeurs = fenetre.read(timeout=10)
         if decompte_actif:
-            dernier_temps = temps_actuel
             temps_actuel = round(time.time())
+            dernier_temps = temps_actuel
             if dernier_temps != temps_actuel:
                 temps_restant -= 1
                 fenetre[TEMPS].update(str(temps_restant))
@@ -171,8 +171,8 @@ def programme_principal() -> None:
                     effacer_question(fenetre)
                     for i in range(NB_QUESTIONS):
                         fenetre[f'{INDICATEUR}-{i}'].update(data=indicateur_vide_base64())
-                    son_fin_partie.play()
-                    musique_questions_controles.stop()
+                    # son_fin_partie.play()
+                    # musique_questions_controles.stop()
                     splasher_echec(3000)
 
                     fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
@@ -190,10 +190,10 @@ def programme_principal() -> None:
             temps_actuel = round(time.time())
             decompte_actif = True
             afficher(fenetre, questions[prochaine_question][0])
-            musique_questions_controles = musique_questions.play()
-        elif event == 'BOUTON-GAUCHE' or event == 'BOUTON-DROIT':
-            if (event == 'BOUTON-GAUCHE' and fenetre['BOUTON-GAUCHE'].get_text() != questions[prochaine_question][0][1]) or \
-               (event == 'BOUTON-DROIT' and fenetre['BOUTON-DROIT'].get_text() != questions[prochaine_question][0][1]):
+            # musique_questions_controles = musique_questions.play()
+        elif event == BOUTON_GAUCHE or event == BOUTON_DROIT:
+            if (event == BOUTON_GAUCHE and fenetre[BOUTON_GAUCHE].get_text() != questions[prochaine_question][0][1]) or \
+               (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
                 # le joueur a choisi la mauvaise réponse
                 fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=indicateur_vert_base64())
                 questions[prochaine_question][1] = Indicateur.VERT
@@ -207,8 +207,8 @@ def programme_principal() -> None:
                     for i in range(NB_QUESTIONS):
                         fenetre[f'{INDICATEUR}-{i}'].update(data=indicateur_vide_base64())
                         questions[i][1] = Indicateur.VIDE
-                    musique_questions_controles.stop()
-                    son_victoire.play()
+                    # musique_questions_controles.stop()
+                    # son_victoire.play()
                     splasher_succes()
                     fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
                     fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
@@ -230,8 +230,8 @@ def programme_principal() -> None:
                 prochaine_question = 0
                 fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
                 fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
-                son_erreur.play()
-                musique_questions_controles.stop()
+                # son_erreur.play()
+                # musique_questions_controles.stop()
         elif event == gui.WIN_CLOSED:
             decompte_actif = False
             quitter = True
