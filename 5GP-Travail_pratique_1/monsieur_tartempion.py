@@ -154,7 +154,7 @@ def programme_principal() -> None:
     splacher_titre(2000, True)
 
     toutes_les_questions = charger_questions("questions.bd")
-    questions = choisir_questions(toutes_les_questions, 21)
+    questions = choisir_questions(toutes_les_questions, NB_QUESTIONS)
 
     fenetre = afficher_jeu()
     temps_restant = 60
@@ -205,7 +205,7 @@ def programme_principal() -> None:
                 prochaine_question += 1
                 if prochaine_question < NB_QUESTIONS:
                     afficher(fenetre, questions[prochaine_question][0])
-                elif 21 <= prochaine_question:
+                elif NB_QUESTIONS <= prochaine_question:
                     decompte_actif = False
                     fenetre.hide()
                     effacer_question_affichee(fenetre)
