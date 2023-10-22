@@ -31,14 +31,15 @@ from images import *
 from indicateurs import Indicateur
 
 
-# Définir le nombre de questions
-NB_QUESTIONS: int = 21
 NOM_FICHIER_SON_VICTOIRE = '522243__dzedenz__result-10.wav'
 NOM_FICHIER_SON_ERREUR = '409282__wertstahl__syserr1v1-in_thy_face_short.wav'
 NOM_FICHIER_SON_FIN_PARTIE = '173859__jivatma07__j1game_over_mono.wav'
 NOM_FICHIER_MUSIQUE_QUESTIONS = '550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav'
 
-NB_QUESTIONS = 21
+# Définir le nombre de questions
+NB_QUESTIONS: int = 21
+
+TEMPS_EPREUVE = 60
 
 TITRE = 'TITRE'
 TEMPS = 'TEMPS'
@@ -73,7 +74,7 @@ def fenetre_de_jeu() -> gui.Window:
     title = [gui.Text('Monsieur Tartempion', key=TITRE, font=police_titre)]
 
     temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')],
-             [gui.Text('60', key=TEMPS, font=police_temps)]]
+             [gui.Text(str(TEMPS_EPREUVE), key=TEMPS, font=police_temps)]]
 
     boutons_reponse = [gui.Column([[gui.Button(key=BOUTON_GAUCHE, font=police_reponses,
                                     button_color=('white', gui.theme_background_color()),
@@ -179,9 +180,18 @@ def programme_principal() -> None:
     # Créer la fenêtre de jeu
     fenetre = fenetre_de_jeu()
 
-    temps_restant = 3
+    temps_restant = TEMPS_EPREUVE
     prochaine_question = 0
     decompte_actif = False
+
+    def nouvelle_partie() -> None:
+        fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
+        fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
+        temps_restant = TEMPS_EPREUVE
+        fenetre[TEMPS].update(str(temps_restant))
+        fenetre.un_hide()
+        questions = choisir_questions(toutes_les_questions, NB_QUESTIONS)
+        prochaine_question = 0
 
     quitter = False
     # Tant qu'on ne quitte pas le jeu, fait cela
@@ -206,15 +216,7 @@ def programme_principal() -> None:
                     musique_questions_controles.stop()
                     son_fin_partie.play()
                     splasher_echec(3000)
-
-                    # On réaffiche le jeu de début
-                    fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
-                    fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
-                    temps_restant = 60
-                    fenetre[TEMPS].update(str(temps_restant))
-                    fenetre.un_hide()
-                    questions = choisir_questions(toutes_les_questions, NB_QUESTIONS)
-                    prochaine_question = 0
+                    nouvelle_partie()
 
         # Si on clique sur le bouton pour commencer le jeu, on affiche les questions
         if event == BOUTON_ACTION:
@@ -230,7 +232,8 @@ def programme_principal() -> None:
 
             # Si le joueur a choisi la bonne réponse
             if (event == BOUTON_GAUCHE and fenetre[BOUTON_GAUCHE].get_text() != questions[prochaine_question][0][1]) or \
-               (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
+                    (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
+                # le joueur a choisi la mauvaise réponse
                 fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=indicateur_vert_base64())
                 questions[prochaine_question][1] = Indicateur.VERT
                 prochaine_question += 1
@@ -246,15 +249,7 @@ def programme_principal() -> None:
                     musique_questions_controles.stop()
                     son_victoire.play()
                     splasher_succes()
-                    fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
-                    fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
-                    temps_restant = TEMPS_EPREUVE
-                    fenetre[TEMPS].update(str(temps_restant))
-                    fenetre.un_hide()
-                    questions = choisir_questions(toutes_les_questions, NB_QUESTIONS)
-                    prochaine_question = 0
-
-            # Sinon, le joueur a choisi la mauvaise réponse
+                    nouvelle_partie()
             else:
                 decompte_actif = False
                 effacer_question(fenetre)
