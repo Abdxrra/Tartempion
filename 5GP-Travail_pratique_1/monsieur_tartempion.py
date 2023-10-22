@@ -67,7 +67,7 @@ def fenetre_de_jeu() -> gui.Window:
     title = [gui.Text('Monsieur Tartempion', key=TITRE, font=police_titre)]
 
     temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')],
-             [gui.Text('60', key='TEMPS', font=police_temps)]]
+             [gui.Text('60', key=TEMPS, font=police_temps)]]
 
     boutons_reponse = [gui.Column([[gui.Button(key=BOUTON_GAUCHE, font=police_reponses,
                                     button_color=('white', gui.theme_background_color()),
@@ -189,7 +189,7 @@ def programme_principal() -> None:
             if dernier_temps != temps_actuel:
                 temps_restant -= 1
                 fenetre[TEMPS].update(str(temps_restant))
-                
+
                 # Si le temps est écoulé, affiche l'écran d'échec
                 if temps_restant == 0:
                     decompte_actif = False
