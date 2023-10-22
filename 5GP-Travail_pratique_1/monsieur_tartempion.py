@@ -31,6 +31,11 @@ from images import *
 from indicateurs import Indicateur
 
 
+NOM_FICHIER_SON_VICTOIRE = '522243__dzedenz__result-10.wav'
+NOM_FICHIER_SON_ERREUR = '409282__wertstahl__syserr1v1-in_thy_face_short.wav'
+NOM_FICHIER_SON_FIN_PARTIE = '173859__jivatma07__j1game_over_mono.wav'
+NOM_FICHIER_MUSIQUE_QUESTIONS = '550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav'
+
 NB_QUESTIONS = 21
 
 TITRE = 'TITRE'
@@ -140,10 +145,10 @@ def programme_principal() -> None:
 
     gui.theme('Black')
 
-    # son_victoire = sa.WaveObject.from_wave_file('522243__dzedenz__result-10.wav')
-    # son_erreur = sa.WaveObject.from_wave_file('409282__wertstahl__syserr1v1-in_thy_face_short.wav')
-    # son_fin_partie = sa.WaveObject.from_wave_file('173859__jivatma07__j1game_over_mono.wav')
-    # musique_questions = sa.WaveObject.from_wave_file('550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav')
+    # son_victoire = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_VICTOIRE)
+    # son_erreur = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_ERREUR)
+    # son_fin_partie = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_FIN_PARTIE)
+    # musique_questions = sa.WaveObject.from_wave_file(NOM_FICHIER_MUSIQUE_QUESTIONS)
 
     splasher_equipe(1500)
     splacher_titre(2000, True)
