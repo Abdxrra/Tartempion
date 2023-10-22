@@ -236,7 +236,7 @@ def programme_principal() -> None:
                 prochaine_question += 1
                 if prochaine_question < NB_QUESTIONS:
                     afficher(fenetre, questions[prochaine_question][0])
-                elif 21 <= prochaine_question:
+                elif NB_QUESTIONS <= prochaine_question:
                     decompte_actif = False
                     fenetre.hide()
                     effacer_question_affichee(fenetre)
