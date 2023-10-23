@@ -181,8 +181,8 @@ def programme_principal() -> None:
     while not quitter:
         event, valeurs = fenetre.read(timeout=10)
         if decompte_actif:
-            temps_actuel = round(time.time())
             dernier_temps = temps_actuel
+            temps_actuel = round(time.time())
             if dernier_temps != temps_actuel:
                 temps_restant -= 1
                 fenetre[TEMPS].update(str(temps_restant))
