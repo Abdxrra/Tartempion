@@ -171,10 +171,17 @@ def programme_principal() -> None:
     def nouvelle_partie() -> None:
         fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
         fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
+
+        nonlocal temps_restant
         temps_restant = TEMPS_EPREUVE
+
         fenetre[TEMPS].update(str(temps_restant))
         fenetre.un_hide()
+
+        nonlocal questions
         questions = choisir_questions(toutes_les_questions, NB_QUESTIONS)
+
+        nonlocal prochaine_question
         prochaine_question = 0
 
     quitter = False
