@@ -45,7 +45,7 @@ police_ou = (gui.DEFAULT_FONT, 20, 'italic')
 def splasher_equipe(temps_ms: int) -> None:
     """Afficher le logo de l'équipe"""
 
-    gui.Window(TITRE, [[gui.Image(data=equipe_base64())]], no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
+    gui.Window(TITRE, [[gui.Image(data=equipe_base64(), subsample=2)]], no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
 
 def splacher_titre(delai: int, pardessus: bool) -> None:
