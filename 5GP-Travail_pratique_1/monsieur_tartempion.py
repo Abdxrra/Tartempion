@@ -32,6 +32,7 @@ from indicateurs import Indicateur
 
 
 NB_QUESTIONS = 21
+TITRE = "Monsieur Tartempion"
 
 police_title = (gui.DEFAULT_FONT, 40, 'italic')
 police_etiquettes = (gui.DEFAULT_FONT, 20, 'normal')
@@ -40,19 +41,23 @@ police_question = (gui.DEFAULT_FONT, 30, 'normal')
 police_reponses = (gui.DEFAULT_FONT, 20, 'normal')
 police_ou = (gui.DEFAULT_FONT, 20, 'italic')
 
-def splasher_equipe(temps_ms: int) -> None:
 
-    gui.Window('Monsieur Tartempion', [[gui.Image(data=equipe_base64())]], # transparent_color=gui.theme_background_color(),
-               no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
+def splasher_equipe(temps_ms: int) -> None:
+    """Afficher le logo de l'équipe"""
+
+    gui.Window(TITRE, [[gui.Image(data=equipe_base64())]], no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
+
 
 def splacher_titre(delai: int, pardessus: bool) -> None:
+    """Afficher le logo du jeu"""
 
-    gui.Window('Monsieur Tartempion', [[gui.Image(data=titre_base64())]], no_titlebar=True, keep_on_top=pardessus).read(timeout=delai, close=True)
+    gui.Window(TITRE, [[gui.Image(data=titre_base64())]], no_titlebar=True, keep_on_top=pardessus).read(timeout=delai, close=True)
 
 
 def afficher_jeu() -> gui.Window:
+    """Afficher l'interface du jeu"""
 
-    title = [gui.Text('Monsieur Tartempion', key='TITLE', font=police_title)]
+    title = [gui.Text(TITRE, key='TITLE', font=police_title)]
 
     temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')], [gui.Text(str(60), key='TEMPS', font=police_temps)]]
 
@@ -69,13 +74,15 @@ def afficher_jeu() -> gui.Window:
 
     indicateurs = [*[gui.Image(data=indicateur_vide_base64(), key=f'INDICATEUR-{i}', pad=(4, 10)) for i in range(NB_QUESTIONS)]]
 
-    fenetre = gui.Window('Monsieur Tartempion', [temps, boutons_reponse, question, action, indicateurs], keep_on_top=True, element_padding=(0, 0),
+    fenetre = gui.Window(TITRE, [temps, boutons_reponse, question, action, indicateurs], keep_on_top=True, element_padding=(0, 0),
                         element_justification='center', resizable=False, finalize=True)
 
     return fenetre
 
 
 def effacer_question_affichee(fenetre: gui.Window) -> None:
+    """efface la question et désactive les boutons """
+
     fenetre['BOUTON-GAUCHE'].update('', disabled=True, visible=True)
     fenetre['QUESTION'].update("")
     fenetre['OU'].update(text_color=gui.theme_background_color())
@@ -83,42 +90,59 @@ def effacer_question_affichee(fenetre: gui.Window) -> None:
 
 
 def charger_questions(fichier_db: str) -> list:
+    """charge les question depuis le fichier BD"""
 
     connexion = squirrel.connect(fichier_db)
 
     with connexion:
         resultat_requete = connexion.execute('SELECT question, reponse_exacte, reponse_erronee FROM QUESTIONS')
+    
+    questions = [(enregistrement[0], enregistrement[1], enregistrement[2]) for enregistrement in resultat_requete]
+    
+    connexion.close()
 
-    return [(enregistrement[0], enregistrement[1], enregistrement[2]) for enregistrement in resultat_requete]
+    return questions
 
 
 def choisir_questions(banque: list, nombre: int) -> list:
+    """choisi une question random depuis la liste des questions"""
 
     return [[question, Indicateur.VIDE] for question in random.choices(banque, k=nombre)]
 
 
 def melanger_reponses(reponses: tuple) -> tuple:
+    """mélange le choix des réponses"""
+
     return (reponses[0], reponses[1]) if bool(random.getrandbits(1)) else (reponses[1], reponses[0])
 
 
 def splasher_echec(temps_ms: int) -> None:
+    """afficher quand le joueur perd"""
 
-    gui.Window('Monsieur Tartempion', [[gui.Image(data=echec_base64())]], transparent_color=gui.theme_background_color(),
+    gui.Window(TITRE, [[gui.Image(data=echec_base64())]], transparent_color=gui.theme_background_color(),
                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
-def splasher_succes() -> None:
 
-    gui.Window('Monsieur Tartempion', [[gui.Image(data=succes_base64())]], transparent_color="maroon2",
+def splasher_succes() -> None:
+    """afficher quand le joueur gagne"""
+
+    gui.Window(TITRE, [[gui.Image(data=succes_base64())]], transparent_color="maroon2",
                no_titlebar=True, keep_on_top=True).read(timeout=3000, close=True)
 
+
 def afficher(fenetre: gui.Window, question: tuple) -> None:
+    """afficher la question"""
+
     fenetre['QUESTION'].update(question[0])
     reponses = melanger_reponses((question[1], question[2]))
     fenetre['BOUTON-GAUCHE'].update(reponses[0], disabled=False, visible=True)
     fenetre['OU'].update(text_color='white')
     fenetre['BOUTON-DROIT'].update(reponses[1], disabled=False, visible=True)
 
+
 def effacer_question(fenetre: gui.Window) -> None:
+    """enlever la question de l'écran"""
+    
     fenetre['QUESTION'].update('')
     fenetre['BOUTON-GAUCHE'].update('', disabled=True, visible=True)
     fenetre['OU'].update(text_color=gui.theme_background_color())
@@ -148,7 +172,7 @@ def programme_principal() -> None:
 
     quitter = False
     while not quitter:
-        event, valeurs = fenetre.read(timeout=10)
+        event = fenetre.read(timeout=10)[0]
         if decompte_actif:
             dernier_temps = temps_actuel
             temps_actuel = round(time.time())
@@ -164,7 +188,7 @@ def programme_principal() -> None:
                     son_fin_partie.play()
                     musique_questions_controles.stop()
                     splasher_echec(3000)
-
+ 
                     fenetre['BOUTON-ACTION'].update(disabled=False, visible=True)
                     fenetre['IMAGE-BOUTON-INACTIF'].update(visible=False)
                     temps_restant = 60
@@ -190,10 +214,13 @@ def programme_principal() -> None:
                 prochaine_question += 1
                 if prochaine_question < NB_QUESTIONS:
                     afficher(fenetre, questions[prochaine_question][0])
+
+                # quand le joueur gagne
                 elif 21 <= prochaine_question:
                     decompte_actif = False
                     fenetre.hide()
                     effacer_question_affichee(fenetre)
+                    print("test ben")
                     for i in range(NB_QUESTIONS):
                         fenetre[f'INDICATEUR-{i}'].update(data=indicateur_vide_base64())
                         questions[i][1] = Indicateur.VIDE
@@ -228,5 +255,6 @@ def programme_principal() -> None:
 
     fenetre.close()
     del fenetre
+
 
 programme_principal()
