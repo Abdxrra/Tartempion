@@ -22,7 +22,7 @@ Ressources sous licences:
 """
 
 import random
-# import simpleaudio as sa
+import simpleaudio as sa
 import time
 import sqlite3 as squirrel
 import PySimpleGUI as gui
@@ -152,10 +152,10 @@ def programme_principal() -> None:
 
     gui.theme('Black')
 
-    # son_victoire = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_VICTOIRE)
-    # son_erreur = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_ERREUR)
-    # son_fin_partie = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_FIN_PARTIE)
-    # musique_questions = sa.WaveObject.from_wave_file(NOM_FICHIER_MUSIQUE_QUESTIONS)
+    son_victoire = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_VICTOIRE)
+    son_erreur = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_ERREUR)
+    son_fin_partie = sa.WaveObject.from_wave_file(NOM_FICHIER_SON_FIN_PARTIE)
+    musique_questions = sa.WaveObject.from_wave_file(NOM_FICHIER_MUSIQUE_QUESTIONS)
 
     splasher_equipe(1500)
     splacher_titre(2000, True)
@@ -190,17 +190,22 @@ def programme_principal() -> None:
         if decompte_actif:
             dernier_temps = temps_actuel
             temps_actuel = round(time.time())
+
             if dernier_temps != temps_actuel:
                 temps_restant -= 1
                 fenetre[TEMPS].update(str(temps_restant))
+
                 if temps_restant == 0:
                     decompte_actif = False
                     fenetre.hide()
                     effacer_question(fenetre)
+
                     for i in range(NB_QUESTIONS):
                         fenetre[f'{INDICATEUR}-{i}'].update(data=indicateur_vide_base64())
-                    # son_fin_partie.play()
-                    # musique_questions_controles.stop()
+
+                    son_fin_partie.play()
+                    musique_questions_controles.stop()
+
                     splasher_echec(3000)
                     nouvelle_partie()
                     continue
@@ -208,10 +213,13 @@ def programme_principal() -> None:
         if event == BOUTON_ACTION:
             fenetre[BOUTON_ACTION].update(disabled=True, visible=False)
             fenetre[IMAGE_BOUTON_INACTIF].update(visible=True)
+
             temps_actuel = round(time.time())
             decompte_actif = True
+
             afficher(fenetre, questions[prochaine_question][0])
-            # musique_questions_controles = musique_questions.play()
+            musique_questions_controles = musique_questions.play()
+
         elif event == BOUTON_GAUCHE or event == BOUTON_DROIT:
             if (event == BOUTON_GAUCHE and fenetre[BOUTON_GAUCHE].get_text() != questions[prochaine_question][0][1]) or \
                     (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
@@ -219,17 +227,21 @@ def programme_principal() -> None:
                 fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=indicateur_vert_base64())
                 questions[prochaine_question][1] = Indicateur.VERT
                 prochaine_question += 1
+
                 if prochaine_question < NB_QUESTIONS:
                     afficher(fenetre, questions[prochaine_question][0])
                 elif NB_QUESTIONS <= prochaine_question:
                     decompte_actif = False
                     fenetre.hide()
                     effacer_question_affichee(fenetre)
+
                     for i in range(NB_QUESTIONS):
                         fenetre[f'{INDICATEUR}-{i}'].update(data=indicateur_vide_base64())
                         questions[i][1] = Indicateur.VIDE
-                    # musique_questions_controles.stop()
-                    # son_victoire.play()
+
+                    musique_questions_controles.stop()
+                    son_victoire.play()
+
                     splasher_succes()
                     nouvelle_partie()
                     continue
@@ -237,16 +249,19 @@ def programme_principal() -> None:
                 # le joueur a choisi la bonne réponse
                 decompte_actif = False
                 effacer_question(fenetre)
+
                 for i in range(prochaine_question):
                     fenetre[f'{INDICATEUR}-{i}'].update(data=indicateur_jaune_base64())
                     questions[i][1] = Indicateur.JAUNE
                 fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=indicateur_rouge_base64())
                 questions[prochaine_question][1] = Indicateur.ROUGE
+
                 prochaine_question = 0
                 fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
                 fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
-                # son_erreur.play()
-                # musique_questions_controles.stop()
+
+                son_erreur.play()
+                musique_questions_controles.stop()
         elif event == gui.WIN_CLOSED:
             decompte_actif = False
             quitter = True
