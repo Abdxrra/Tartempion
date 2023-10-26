@@ -30,6 +30,8 @@ import PySimpleGUI as gui
 from images import *
 from indicateurs import Indicateur
 
+NOM_APP = 'Monsieur Tartempion'
+
 NOM_FICHIER_SON_VICTOIRE = '522243__dzedenz__result-10.wav'
 NOM_FICHIER_SON_ERREUR = '409282__wertstahl__syserr1v1-in_thy_face_short.wav'
 NOM_FICHIER_SON_FIN_PARTIE = '173859__jivatma07__j1game_over_mono.wav'
@@ -60,17 +62,17 @@ police_ou: tuple = (gui.DEFAULT_FONT, 20, 'italic')
 
 # Définir une fonction pour afficher un écran de démarrage pour l'équipe
 def splasher_equipe(temps_ms: int) -> None:
-    gui.Window('Monsieur Tartempion', [[gui.Image(data=equipe_base64())]],
+    gui.Window(NOM_APP, [[gui.Image(data=equipe_base64())]],
                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
 # Définir une fonction pour afficher un écran de démarrage pour le titre
 def splasher_titre(delai: int, pardessus: bool) -> None:
-    gui.Window('Monsieur Tartempion', [[gui.Image(data=titre_base64())]],
+    gui.Window(NOM_APP, [[gui.Image(data=titre_base64())]],
                no_titlebar=True, keep_on_top=pardessus).read(timeout=delai, close=True)
 
 # Définir une fonction pour créer la fenêtre de jeu principale
 def fenetre_de_jeu() -> gui.Window:
-    title = [gui.Text('Monsieur Tartempion', key=TITRE, font=police_titre)]
+    title = [gui.Text(NOM_APP, key=TITRE, font=police_titre)]
 
     temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')],
              [gui.Text(str(TEMPS_EPREUVE), key=TEMPS, font=police_temps)]]
@@ -92,7 +94,7 @@ def fenetre_de_jeu() -> gui.Window:
     indicateurs = [*[gui.Image(data=indicateur_vide_base64(), key=f'{INDICATEUR}-{i}', pad=(4, 10)) for i in range(NB_QUESTIONS)]]
 
     # Construire la fenêtre avec tout les éléments
-    fenetre = gui.Window('Monsieur Tartempion', [temps, boutons_reponse, question, action, indicateurs], keep_on_top=True,
+    fenetre = gui.Window(NOM_APP, [temps, boutons_reponse, question, action, indicateurs], keep_on_top=True,
                         element_padding=(0, 0), element_justification='center', resizable=False, finalize=True)
 
     return fenetre
@@ -127,13 +129,13 @@ def melanger_reponses(reponses: tuple) -> tuple:
 
 # Définition d'une fonction pour afficher un écran d'échec
 def splasher_echec(temps_ms: int) -> None:
-    gui.Window('Monsieur Tartempion', [[gui.Image(data=echec_base64())]],
+    gui.Window(NOM_APP, [[gui.Image(data=echec_base64())]],
                transparent_color=gui.theme_background_color(),
                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
 # Définition d'une fonction pour afficher un écran de succès
 def splasher_succes() -> None:
-    gui.Window('Monsieur Tartempion', [[gui.Image(data=succes_base64())]],
+    gui.Window(NOM_APP, [[gui.Image(data=succes_base64())]],
                transparent_color="maroon2",
                no_titlebar=True, keep_on_top=True).read(timeout=3000, close=True)
 
