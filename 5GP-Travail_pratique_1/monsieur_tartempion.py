@@ -30,74 +30,26 @@ import pickle
 
 from images import *
 from indicateurs import Indicateur
+from difficulte import Difficulte
+from musique import Musique
 
-class EtatJeu:
+DIFFICULTE = [
+    Difficulte("SUPER FACILE", 10, 60),
+    Difficulte("FACILE", 15, 60),
+    Difficulte("MOYEN", 21, 60),
+    Difficulte("DIFFICILE", 30, 60),
+    Difficulte("TRÈS DIFFICILE", 30, 45)
+]
 
-    def __init__(self) -> None:
-
-        # état par défaut des paramètres du jeu
-        self.musique = Musique
-        self.difficulte = Difficulte
-
-
-class Musique:
-
-    def __init__(self) -> None:
-        
-        self.choix_musiques = {
-            "Basique": '550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav',
-            "Kahoot":'550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav',
-            "Mario 3":'550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav'
-            }
-        
-        self.__musique_choisi = self.choix_musiques["Basique"]
-        
-    def get_musiques(self) -> []:
-        return list(self.choix_musiques.keys())
-    
-    @property.setter
-    def musique(self, musique):
-        if musique in self.choix_musiques:
-            self.__musique_choisi = self.choix_musiques[musique]
-
-    @property.getter
-    def musique(self):
-        return self.__musique_choisi
-
-
-class Difficulte:
-
-    def __init__(self) -> None:
-        
-        self.choix_difficulte = {
-            "TRÈS DIFFICILE": (30, 45),
-            "DIFFICILE": (30, 60),
-            "MOYEN": (21, 60),
-            "FACILE": (15, 60),
-            "SUPER FACILE": (10, 60)
-            }
-        
-        self.__difficulte_choisi = self.choix_difficulte["MOYEN"]
-        
-    def get_difficultes(self) -> []:
-        return list(self.choix_difficulte.keys())
-
-    @property.setter
-    def difficulte(self, difficulte):
-        if difficulte in self.choix_difficulte:
-            self.__difficulte_choisi = self.choix_difficulte[difficulte]
-
-    @property.getter
-    def nombre_questions(self):
-        return self.__difficulte_choisi[0]
-
-    @property.getter
-    def temps(self):
-        return self.__difficulte_choisi[1]
-    
-
+MUSIQUES = [
+    Musique("Basique", '550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav'),
+    Musique("Kahoot", 'kahoot.wav'),
+    Musique("Mario", 'mario.wav')
+]
 
 TITRE = "Monsieur Tartempion"
+difficulte_choisie = DIFFICULTE[2]
+musique_choisie = MUSIQUES[0]
 
 
 #musique_actuelle
@@ -113,9 +65,9 @@ police_ou = (gui.DEFAULT_FONT, 20, 'italic')
 def afficher_menu() -> None:
     """Afficher le menu"""
 
-    difficulte_selection = gui.Combo(list(DIFFICULTE.keys()), list(DIFFICULTE.keys())[1], font=police_reponses, enable_events=True,  readonly=True, key='COMBO_DIFFICULTE')
+    difficulte_selection = gui.Combo(DIFFICULTE, DIFFICULTE[2], font=police_reponses, enable_events=True,  readonly=True, key='COMBO_DIFFICULTE')
 
-    musique_selection = gui.Combo(list(MUSIQUES.keys()), list(MUSIQUES.keys())[0], font=police_reponses,  enable_events=True,  readonly=True, key='COMBO_MUSIQUE')
+    musique_selection = gui.Combo(MUSIQUES, musique_choisie, font=police_reponses,  enable_events=True,  readonly=True, key='COMBO_MUSIQUE')
 
     commencer = gui.Button("COMMENCER", key='BOUTON-COMMENCER', font=police_reponses, button_color=('white', gui.theme_background_color()), border_width=0)
     quitter = gui.Button("QUITTER", key='BOUTON-QUITTER', font=police_reponses, button_color=('white', gui.theme_background_color()), border_width=0)
@@ -130,7 +82,7 @@ def afficher_menu() -> None:
     ]
 
     fenetre = gui.Window(TITRE, design, keep_on_top=True, element_padding=(0, 0),
-                        element_justification='center', resizable=False, finalize=True, size=(400, 280))
+                        element_justification='center', resizable=False, finalize=True, size=(500, 280))
 
     return fenetre
 
@@ -150,15 +102,9 @@ def splacher_titre(delai: int, pardessus: bool) -> None:
 def afficher_jeu() -> gui.Window:
     """Afficher l'interface du jeu"""
 
-    # fonctionnalité menu
-
-
-
-    # code de base
-
     title = [gui.Text(TITRE, key='TITLE', font=police_title)]
 
-    temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')], [gui.Text(str(60), key='TEMPS', font=police_temps)]]
+    temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')], [gui.Text(str(difficulte_choisie.temps), key='TEMPS', font=police_temps)]]
 
     boutons_reponse = [gui.Column([[gui.Button(key='BOUTON-GAUCHE', font=police_reponses, button_color=('white', gui.theme_background_color()),
                    border_width=0, disabled=True, visible=True),
@@ -171,7 +117,7 @@ def afficher_jeu() -> gui.Window:
     action = [gui.Button(image_data=bouton_jouer_base64(), key='BOUTON-ACTION', border_width=0, button_color=(gui.theme_background_color(), gui.theme_background_color()), pad=(0, 10)),
               gui.Image(data=bouton_inactif_base64(), key='IMAGE-BOUTON-INACTIF', visible=False, pad=(0, 10))]
 
-    indicateurs = [*[gui.Image(data=indicateur_vide_base64(), key=f'INDICATEUR-{i}', pad=(4, 10)) for i in range(NB_QUESTIONS)]]
+    indicateurs = [*[gui.Image(data=indicateur_vide_base64(), key=f'INDICATEUR-{i}', pad=(4, 10)) for i in range(difficulte_choisie.nombre_questions)]]
 
     fenetre = gui.Window(TITRE, [temps, boutons_reponse, question, action, indicateurs], keep_on_top=True, element_padding=(0, 0),
                         element_justification='center', resizable=False, finalize=True)
@@ -250,13 +196,14 @@ def effacer_question(fenetre: gui.Window) -> None:
 
 def programme_principal() -> None:
     """Despote suprême de toutes les fonctions."""
+    global difficulte_choisie
+    global musique_choisie
 
     gui.theme('Black')
 
     son_victoire = sa.WaveObject.from_wave_file('522243__dzedenz__result-10.wav')
     son_erreur = sa.WaveObject.from_wave_file('409282__wertstahl__syserr1v1-in_thy_face_short.wav')
     son_fin_partie = sa.WaveObject.from_wave_file('173859__jivatma07__j1game_over_mono.wav')
-    musique_questions = sa.WaveObject.from_wave_file('550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav')
 
     #splasher_equipe(1500)
     #splacher_titre(2000, True)
@@ -266,7 +213,6 @@ def programme_principal() -> None:
 
     fenetre_menu = afficher_menu()
     menu_boucle = True
-    quitter_depuis_menu = False
 
     while menu_boucle:
         event, values = fenetre_menu.read(timeout=10)
@@ -281,13 +227,16 @@ def programme_principal() -> None:
                 return
                 
             case 'COMBO_DIFFICULTE':
-                print(values["COMBO_DIFFICULTE"])
+                difficulte_choisie = values['COMBO_DIFFICULTE']
 
             case 'COMBO_MUSIQUE':
-                print(values["COMBO_MUSIQUE"])
+                musique_choisie = values['COMBO_MUSIQUE']
+
+    # met la musique ici pour actualiser
+    musique_questions = sa.WaveObject.from_wave_file(musique_choisie.chemin_fichier)
 
     fenetre = afficher_jeu()
-    temps_restant = 60
+    temps_restant = difficulte_choisie.temps
     prochaine_question = 0
     decompte_actif = False
 
@@ -304,7 +253,7 @@ def programme_principal() -> None:
                     decompte_actif = False
                     fenetre.hide()
                     effacer_question(fenetre)
-                    for i in range(NB_QUESTIONS):
+                    for i in range(difficulte_choisie.nombre_questions):
                         fenetre[f'INDICATEUR-{i}'].update(data=indicateur_vide_base64())
                     son_fin_partie.play()
                     musique_questions_controles.stop()
@@ -312,10 +261,10 @@ def programme_principal() -> None:
  
                     fenetre['BOUTON-ACTION'].update(disabled=False, visible=True)
                     fenetre['IMAGE-BOUTON-INACTIF'].update(visible=False)
-                    temps_restant = 60
+                    temps_restant = difficulte_choisie.temps
                     fenetre['TEMPS'].update(str(temps_restant))
                     fenetre.un_hide()
-                    questions = choisir_questions(toutes_les_questions, NB_QUESTIONS)
+                    questions = choisir_questions(toutes_les_questions, difficulte_choisie.nombre_questions)
                     prochaine_question = 0
                     continue
 
@@ -333,7 +282,7 @@ def programme_principal() -> None:
                 fenetre[f'INDICATEUR-{prochaine_question}'].update(data=indicateur_vert_base64())
                 questions[prochaine_question][1] = Indicateur.VERT
                 prochaine_question += 1
-                if prochaine_question < NB_QUESTIONS:
+                if prochaine_question < difficulte_choisie.nombre_questions:
                     afficher(fenetre, questions[prochaine_question][0])
 
                 # quand le joueur gagne
@@ -342,7 +291,7 @@ def programme_principal() -> None:
                     fenetre.hide()
                     effacer_question_affichee(fenetre)
                     print("test ben")
-                    for i in range(NB_QUESTIONS):
+                    for i in range(difficulte_choisie.nombre_questions):
                         fenetre[f'INDICATEUR-{i}'].update(data=indicateur_vide_base64())
                         questions[i][1] = Indicateur.VIDE
                     musique_questions_controles.stop()
@@ -350,10 +299,10 @@ def programme_principal() -> None:
                     splasher_succes()
                     fenetre['BOUTON-ACTION'].update(disabled=False, visible=True)
                     fenetre['IMAGE-BOUTON-INACTIF'].update(visible=False)
-                    temps_restant = TEMPS_EPREUVE
+                    temps_restant = difficulte_choisie.temps
                     fenetre['TEMPS'].update(str(temps_restant))
                     fenetre.un_hide()
-                    questions = choisir_questions(toutes_les_questions, NB_QUESTIONS)
+                    questions = choisir_questions(toutes_les_questions, difficulte_choisie.nombre_questions)
                     prochaine_question = 0
                     continue
             else:
