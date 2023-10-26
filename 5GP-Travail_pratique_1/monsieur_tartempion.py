@@ -204,6 +204,9 @@ def programme_principal() -> None:
         nonlocal prochaine_question
         prochaine_question = 0
 
+        nonlocal position_meilleure_tentative
+        position_meilleure_tentative = 0
+
     quitter = False
     # Tant qu'on ne quitte pas le jeu, fait cela
     while not quitter:
@@ -227,8 +230,8 @@ def programme_principal() -> None:
                     for i in range(NB_QUESTIONS):
                         fenetre[f'{INDICATEUR}-{i}'].update(data=indicateur_vide_base64())
 
-                    son_fin_partie.play()
                     musique_questions_controles.stop()
+                    son_fin_partie.play()
 
                     splasher_echec(3000)
                     nouvelle_partie()
