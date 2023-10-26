@@ -42,6 +42,8 @@ police_question: tuple = (gui.DEFAULT_FONT, 30, 'normal')
 police_reponses: tuple = (gui.DEFAULT_FONT, 20, 'normal')
 police_ou: tuple = (gui.DEFAULT_FONT, 20, 'italic')
 
+decompte_actif = False
+
 # Définir une fonction pour afficher un écran de démarrage pour l'équipe
 def splasher_equipe(temps_ms: int) -> None:
     gui.Window('Monsieur Tartempion', [[gui.Image(data=equipe_base64())]],
@@ -127,13 +129,21 @@ def afficher(fenetre: gui.Window, question: tuple) -> None:
     fenetre['OU'].update(text_color='white')
     fenetre['BOUTON-DROIT'].update(reponses[1], disabled=False, visible=True)
 
-# Définition d'une fonction pour effacer la question affichée dans la fenêtre
+# Fonction pour effacer la question affichée dans la fenêtre
 def effacer_question(fenetre: gui.Window) -> None:
     fenetre['QUESTION'].update('')
     fenetre['BOUTON-GAUCHE'].update('', disabled=True, visible=True)
     fenetre['OU'].update(text_color=gui.theme_background_color())
     fenetre['BOUTON-DROIT'].update('', disabled=True, visible=True)
 
+# Fonction pour avoir le decompte actif
+def obtenir_activite_decompte():
+    return decompte_actif
+
+def fermer_programme(fenetre):
+    fenetre.close()
+    del fenetre
+    
 # Fonction principale du programme
 def programme_principal() -> None:
 
@@ -160,10 +170,9 @@ def programme_principal() -> None:
 
     # Créer la fenêtre de jeu
     fenetre = fenetre_de_jeu()
-
-    temps_restant = 3
-    prochaine_question = 0
     decompte_actif = False
+    temps_restant = 60
+    prochaine_question = 0
 
     quitter = False
     # Tant qu'on ne quitte pas le jeu, fait cela
@@ -255,7 +264,6 @@ def programme_principal() -> None:
             decompte_actif = False
             quitter = True
 
-    fenetre.close()
-    del fenetre
+    fermer_programme(fenetre)
 
 programme_principal()
