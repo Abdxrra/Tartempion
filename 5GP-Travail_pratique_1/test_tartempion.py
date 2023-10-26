@@ -12,6 +12,13 @@ class TestTartempion(unittest.TestCase):
     def test_charger_questions_bd(self):
         questions = charger_questions("questions.bd")
         self.assertIsInstance(questions, list)
+        
+    def test_bonne_reponse(self):
+        self.assertEqual()
+        
+    def test_mauvaise_reponse(self):
+        self.assertEqual()
+
 
 if __name__ == '__main__':
     unittest.main()
