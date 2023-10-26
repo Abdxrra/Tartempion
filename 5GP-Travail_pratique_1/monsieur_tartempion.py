@@ -224,8 +224,10 @@ def programme_principal() -> None:
 
                     for i in range(NB_QUESTIONS):
                         fenetre[f'{INDICATEUR}-{i}'].update(data=indicateur_vide_base64())
-                    musique_questions_controles.stop()
+
                     son_fin_partie.play()
+                    musique_questions_controles.stop()
+
                     splasher_echec(3000)
                     nouvelle_partie()
 
@@ -285,13 +287,10 @@ def programme_principal() -> None:
                 fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
                 fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
 
-                son_erreur.play()
                 musique_questions_controles.stop()
+                son_erreur.play()
 
         # Si on ferme le jeu
-
-                son_erreur.play()
-                musique_questions_controles.stop()
         elif event == gui.WIN_CLOSED:
             decompte_actif = False
             quitter = True
