@@ -183,6 +183,9 @@ def programme_principal() -> None:
     prochaine_question = 0
     decompte_actif = False
 
+    # position de la question echouee lors de la meilleure tentative
+    position_meilleure_tentative = 0
+
     def nouvelle_partie() -> None:
         fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
         fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
@@ -271,8 +274,12 @@ def programme_principal() -> None:
                 for i in range(prochaine_question):
                     fenetre[f'{INDICATEUR}-{i}'].update(data=indicateur_jaune_base64())
                     questions[i][1] = Indicateur.JAUNE
-                fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=indicateur_rouge_base64())
-                questions[prochaine_question][1] = Indicateur.ROUGE
+
+                if prochaine_question >= position_meilleure_tentative:
+                    position_meilleure_tentative = prochaine_question
+
+                    fenetre[f'{INDICATEUR}-{position_meilleure_tentative}'].update(data=indicateur_rouge_base64())
+                    questions[position_meilleure_tentative][1] = Indicateur.ROUGE
 
                 prochaine_question = 0
                 fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
