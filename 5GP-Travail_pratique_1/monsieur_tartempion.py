@@ -62,6 +62,8 @@ police_ou: tuple = (gui.DEFAULT_FONT, 20, 'italic')
 
 decompte_actif = False
 
+decompte_actif = False
+
 # Définir une fonction pour afficher un écran de démarrage pour l'équipe
 def splasher_equipe(temps_ms: int) -> None:
     gui.Window(NOM_APP, [[gui.Image(data=equipe_base64())]],
@@ -196,8 +198,9 @@ def programme_principal() -> None:
     # Créer la fenêtre de jeu
     fenetre = fenetre_de_jeu()
 
-    temps_restant = 3
+    temps_restant = TEMPS_EPREUVE
     prochaine_question = 0
+    decompte_actif = False
 
     # position de la question echouee lors de la meilleure tentative
     position_meilleure_tentative = 0
