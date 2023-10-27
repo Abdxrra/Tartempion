@@ -124,8 +124,11 @@ def choisir_questions(banque: list, nombre: int) -> list:
     return [[question, Indicateur.VIDE] for question in random.choices(banque, k=nombre)]
 
 # Définition d'une fonction pour mélanger les réponses
-def melanger_reponses(reponses: tuple) -> tuple:
-    return (reponses[0], reponses[1]) if bool(random.getrandbits(1)) else (reponses[1], reponses[0])
+def melanger_reponses(reponses: list) -> list:
+    # Cette boucle va iterer a travers chaque couple de reponses dans la liste
+    for position_couple_reponses in range(len(reponses)):
+        reponses[position_couple_reponses] = (reponses[position_couple_reponses][0], reponses[position_couple_reponses][1]) if bool(random.getrandbits(1)) else (reponses[position_couple_reponses][1], reponses[position_couple_reponses][0])
+    return reponses
 
 # Définition d'une fonction pour afficher un écran d'échec
 def splasher_echec(temps_ms: int) -> None:
@@ -140,9 +143,8 @@ def splasher_succes() -> None:
                no_titlebar=True, keep_on_top=True).read(timeout=3000, close=True)
 
 # Définition d'une fonction pour afficher une question dans la fenêtre
-def afficher(fenetre: gui.Window, question: tuple) -> None:
+def afficher(fenetre: gui.Window, question: tuple, reponses: tuple) -> None:
     fenetre[QUESTION].update(question[0])
-    reponses = melanger_reponses((question[1], question[2]))
     fenetre[BOUTON_GAUCHE].update(reponses[0], disabled=False, visible=True)
     fenetre[OU].update(text_color='white')
     fenetre[BOUTON_DROIT].update(reponses[1], disabled=False, visible=True)
@@ -178,6 +180,9 @@ def programme_principal() -> None:
     # Choisir 21 questions aléatoirement
     questions = choisir_questions(toutes_les_questions, 21)
 
+    # Reponses avec un ordre melange
+    reponses = melanger_reponses([(question[0][1], question[0][2]) for question in questions])
+
     # Créer la fenêtre de jeu
     fenetre = fenetre_de_jeu()
 
@@ -200,6 +205,9 @@ def programme_principal() -> None:
 
         nonlocal questions
         questions = choisir_questions(toutes_les_questions, NB_QUESTIONS)
+
+        nonlocal reponses
+        reponses = melanger_reponses([(question[0][1], question[0][2]) for question in questions])
 
         nonlocal prochaine_question
         prochaine_question = 0
@@ -244,7 +252,7 @@ def programme_principal() -> None:
             temps_actuel = round(time.time())
             decompte_actif = True
 
-            afficher(fenetre, questions[prochaine_question][0])
+            afficher(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
             musique_questions_controles = musique_questions.play()
 
         # Si on clique sur une des deux réponses (gauche ou droite)
@@ -259,7 +267,7 @@ def programme_principal() -> None:
                 prochaine_question += 1
 
                 if prochaine_question < NB_QUESTIONS:
-                    afficher(fenetre, questions[prochaine_question][0])
+                    afficher(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
                 elif NB_QUESTIONS <= prochaine_question:
                     decompte_actif = False
                     fenetre.hide()
