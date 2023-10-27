@@ -26,12 +26,12 @@ import simpleaudio as sa
 import time
 import sqlite3 as squirrel
 import PySimpleGUI as gui
-import pickle
 
-from images import *
-from indicateurs import Indicateur
-from difficulte import Difficulte
-from musique import Musique
+
+from modules.images import Images
+from modules.indicateurs import Indicateur
+from modules.difficulte import Difficulte
+from modules.musique import Musique
 
 DIFFICULTE = [
     Difficulte("SUPER FACILE", 10, 60),
@@ -42,10 +42,12 @@ DIFFICULTE = [
 ]
 
 MUSIQUES = [
-    Musique("Basique", '550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav'),
-    Musique("Kahoot", 'kahoot.wav'),
-    Musique("Mario", 'mario.wav')
+    Musique("Basique", 'audios/musiques/550764__erokia__msfxp9-187_5-synth-loop-bpm-100.wav'),
+    Musique("Kahoot", 'audios/musiques/kahoot.wav'),
+    Musique("Mario", 'audios/musiques/mario.wav')
 ]
+
+IMAGES = Images()
 
 TITRE = "Monsieur Tartempion"
 difficulte_choisie = DIFFICULTE[2]
@@ -95,14 +97,14 @@ def afficher_menu() -> None:
 def splasher_equipe(temps_ms: int) -> None:
     """Afficher le logo de l'équipe"""
 
-    gui.Window(TITRE, [[gui.Image(data=equipe_base64(), subsample=2)]],
+    gui.Window(TITRE, [[gui.Image(data=IMAGES.equipe_base64(), subsample=2)]],
                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
 
 def splasher_titre(delai: int, pardessus: bool) -> None:
     """Afficher le logo du jeu"""
 
-    gui.Window(TITRE, [[gui.Image(data=titre_base64())]], no_titlebar=True,
+    gui.Window(TITRE, [[gui.Image(data=IMAGES.titre_base64())]], no_titlebar=True,
                keep_on_top=pardessus).read(timeout=delai, close=True)
 
 
@@ -123,11 +125,11 @@ def fenetre_de_jeu() -> gui.Window:
 
     question = [gui.Text(' ', key='QUESTION', font=police_question)]
 
-    action = [gui.Button(image_data=bouton_jouer_base64(), key='BOUTON-ACTION',
+    action = [gui.Button(image_data=IMAGES.bouton_jouer_base64(), key='BOUTON-ACTION',
               border_width=0, button_color=(gui.theme_background_color(), gui.theme_background_color()), pad=(0, 10)),
-              gui.Image(data=bouton_inactif_base64(), key='IMAGE-BOUTON-INACTIF', visible=False, pad=(0, 10))]
+              gui.Image(data=IMAGES.bouton_inactif_base64(), key='IMAGE-BOUTON-INACTIF', visible=False, pad=(0, 10))]
 
-    indicateurs = [*[gui.Image(data=indicateur_vide_base64(), key=f'INDICATEUR-{i}', pad=(
+    indicateurs = [*[gui.Image(data=IMAGES.indicateur_vide_base64(), key=f'INDICATEUR-{i}', pad=(
         4, 10)) for i in range(difficulte_choisie.nombre_questions)]]
 
     fenetre = gui.Window(TITRE, [temps, boutons_reponse, question, action, indicateurs], keep_on_top=True, element_padding=(0, 0),
@@ -180,14 +182,14 @@ def melanger_reponses(reponses: tuple) -> tuple:
 def splasher_echec(temps_ms: int) -> None:
     """afficher un écran d'échec"""
 
-    gui.Window(TITRE, [[gui.Image(data=echec_base64())]], transparent_color=gui.theme_background_color(),
+    gui.Window(TITRE, [[gui.Image(data=IMAGES.echec_base64())]], transparent_color=gui.theme_background_color(),
                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
 
 def splasher_succes() -> None:
     """afficher quand le joueur gagne"""
 
-    gui.Window(TITRE, [[gui.Image(data=succes_base64())]], transparent_color="maroon2",
+    gui.Window(TITRE, [[gui.Image(data=IMAGES.succes_base64())]], transparent_color="maroon2",
                no_titlebar=True, keep_on_top=True).read(timeout=3000, close=True)
 
 
@@ -220,11 +222,11 @@ def programme_principal() -> None:
 
     # Charger des fichiers audio pour les effets sonores
     son_victoire = sa.WaveObject.from_wave_file(
-        '522243__dzedenz__result-10.wav')
+        'audios/effet sonores/522243__dzedenz__result-10.wav')
     son_erreur = sa.WaveObject.from_wave_file(
-        '409282__wertstahl__syserr1v1-in_thy_face_short.wav')
+        'audios/effet sonores/409282__wertstahl__syserr1v1-in_thy_face_short.wav')
     son_fin_partie = sa.WaveObject.from_wave_file(
-        '173859__jivatma07__j1game_over_mono.wav')
+        'audios/effet sonores/173859__jivatma07__j1game_over_mono.wav')
 
     # Afficher un écran de démarrage pour l'équipe
     splasher_equipe(1500)
@@ -288,7 +290,7 @@ def programme_principal() -> None:
                     effacer_question(fenetre)
                     for i in range(difficulte_choisie.nombre_questions):
                         fenetre[f'INDICATEUR-{i}'].update(
-                            data=indicateur_vide_base64())
+                            data=IMAGES.indicateur_vide_base64())
                     musique_questions_controles.stop()
                     son_fin_partie.play()
                     splasher_echec(3000)
@@ -320,7 +322,7 @@ def programme_principal() -> None:
             if (event == 'BOUTON-GAUCHE' and fenetre['BOUTON-GAUCHE'].get_text() != questions[prochaine_question][0][1]) or \
                (event == 'BOUTON-DROIT' and fenetre['BOUTON-DROIT'].get_text() != questions[prochaine_question][0][1]):
                 fenetre[f'INDICATEUR-{prochaine_question}'].update(
-                    data=indicateur_vert_base64())
+                    data=IMAGES.indicateur_vert_base64())
                 questions[prochaine_question][1] = Indicateur.VERT
                 prochaine_question += 1
                 if prochaine_question < difficulte_choisie.nombre_questions:
@@ -334,7 +336,7 @@ def programme_principal() -> None:
                     print("test ben")
                     for i in range(difficulte_choisie.nombre_questions):
                         fenetre[f'INDICATEUR-{i}'].update(
-                            data=indicateur_vide_base64())
+                            data=IMAGES.indicateur_vide_base64())
                         questions[i][1] = Indicateur.VIDE
                     musique_questions_controles.stop()
                     son_victoire.play()
@@ -355,10 +357,10 @@ def programme_principal() -> None:
                 effacer_question(fenetre)
                 for i in range(prochaine_question):
                     fenetre[f'INDICATEUR-{i}'].update(
-                        data=indicateur_jaune_base64())
+                        data=IMAGES.indicateur_jaune_base64())
                     questions[i][1] = Indicateur.JAUNE
                 fenetre[f'INDICATEUR-{prochaine_question}'].update(
-                    data=indicateur_rouge_base64())
+                    data=IMAGES.indicateur_rouge_base64())
                 questions[prochaine_question][1] = Indicateur.ROUGE
                 prochaine_question = 0
                 fenetre['BOUTON-ACTION'].update(disabled=False, visible=True)
