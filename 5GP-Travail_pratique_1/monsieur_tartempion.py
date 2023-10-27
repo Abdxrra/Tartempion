@@ -27,7 +27,6 @@ import time
 import sqlite3 as squirrel
 import PySimpleGUI as gui
 
-
 from modules.images import Images
 from modules.indicateurs import Indicateur
 from modules.difficulte import Difficulte
@@ -69,7 +68,6 @@ BOUTON_QUITTER = 'BOUTON_QUITTER'
 COMBO_DIFFICULTE = 'COMBO_DIFFICULTE'
 COMBO_MUSIQUE = 'COMBO_MUSIQUE'
 
-
 QUESTION = 'QUESTION'
 INDICATEUR = 'INDICATEUR'
 BOUTON_ACTION = 'BOUTON_ACTION'
@@ -87,7 +85,7 @@ police_ou: tuple = (gui.DEFAULT_FONT, 20, 'italic')
 
 
 # def hash_fichier(chemin_fichier) -> str:
-    
+
 #     sha256 = hashlib.sha256()
 
 #     with open(chemin_fichier, 'rb') as f:
@@ -95,7 +93,7 @@ police_ou: tuple = (gui.DEFAULT_FONT, 20, 'italic')
 #             donnee = f.read(BUF_SIZE)
 #             if not donnee:
 #                 break
-            
+
 #             sha256.update(donnee)
 
 #     return sha256.hexdigest()
@@ -110,14 +108,14 @@ police_ou: tuple = (gui.DEFAULT_FONT, 20, 'italic')
 #             sha256_hash.update(data)
 #     return sha256_hash.hexdigest()
 
-def afficher_menu() -> None:
+def afficher_menu() -> gui.Window:
     """Afficher le menu"""
 
     difficulte_selection = gui.Combo(
-        DIFFICULTE, DIFFICULTE[2], font=police_reponses, enable_events=True,  readonly=True, key=COMBO_DIFFICULTE)
+        DIFFICULTE, DIFFICULTE[2], font=police_reponses, enable_events=True, readonly=True, key=COMBO_DIFFICULTE)
 
     musique_selection = gui.Combo(MUSIQUES, musique_choisie, font=police_reponses,
-                                  enable_events=True,  readonly=True, key=COMBO_MUSIQUE)
+                                  enable_events=True, readonly=True, key=COMBO_MUSIQUE)
 
     commencer = gui.Button("COMMENCER", key=BOUTON_COMMENCER, font=police_reponses,
                            button_color=('white', gui.theme_background_color()), border_width=0)
@@ -163,23 +161,26 @@ def fenetre_de_jeu() -> gui.Window:
     temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')], [
         gui.Text(str(difficulte_choisie.temps), key=TEMPS, font=police_temps)]]
 
-    boutons_reponse = [gui.Column([[gui.Button(key=BOUTON_GAUCHE, font=police_reponses, button_color=('white', gui.theme_background_color()),
-                                               border_width=0, disabled=True, visible=True),
-                                    gui.Text(' ou ', key=OU, font=police_ou,
-                                             text_color=gui.theme_background_color()),
-                                    gui.Button(key=BOUTON_DROIT, font=police_reponses, button_color=('white', gui.theme_background_color()),
-                                               border_width=0, disabled=True, visible=True)]], element_justification='center')]
+    boutons_reponse = [gui.Column(
+        [[gui.Button(key=BOUTON_GAUCHE, font=police_reponses, button_color=('white', gui.theme_background_color()),
+                     border_width=0, disabled=True, visible=True),
+          gui.Text(' ou ', key=OU, font=police_ou,
+                   text_color=gui.theme_background_color()),
+          gui.Button(key=BOUTON_DROIT, font=police_reponses, button_color=('white', gui.theme_background_color()),
+                     border_width=0, disabled=True, visible=True)]], element_justification='center')]
 
     question = [gui.Text(' ', key=QUESTION, font=police_question)]
 
     action = [gui.Button(image_data=IMAGES.bouton_jouer_base64(), key=BOUTON_ACTION,
-              border_width=0, button_color=(gui.theme_background_color(), gui.theme_background_color()), pad=(0, 10)),
+                         border_width=0, button_color=(gui.theme_background_color(), gui.theme_background_color()),
+                         pad=(0, 10)),
               gui.Image(data=IMAGES.bouton_inactif_base64(), key=IMAGE_BOUTON_INACTIF, visible=False, pad=(0, 10))]
 
     indicateurs = [*[gui.Image(data=IMAGES.indicateur_vide_base64(), key=f'{INDICATEUR}-{i}', pad=(
         4, 10)) for i in range(difficulte_choisie.nombre_questions)]]
 
-    fenetre = gui.Window(TITRE, [temps, boutons_reponse, question, action, indicateurs], keep_on_top=True, element_padding=(0, 0),
+    fenetre = gui.Window(TITRE, [temps, boutons_reponse, question, action, indicateurs], keep_on_top=True,
+                         element_padding=(0, 0),
                          element_justification='center', resizable=False, finalize=True)
 
     return fenetre
@@ -197,10 +198,11 @@ def effacer_question(fenetre: gui.Window) -> None:
 def melanger_reponses(reponses: list) -> list:
     """fonction pour mélanger les réponses"""
 
-    reponses = list(reponses)
-    random.shuffle(reponses)
-
-    return reponses[::-1]
+    for position_couple_reponses in range(len(reponses)):
+        reponses[position_couple_reponses] = (
+            reponses[position_couple_reponses][0], reponses[position_couple_reponses][1]) if bool(
+            random.getrandbits(1)) else (reponses[position_couple_reponses][1], reponses[position_couple_reponses][0])
+    return reponses
 
 
 def splasher_echec(temps_ms: int = 3000) -> None:
@@ -217,11 +219,10 @@ def splasher_succes(temps_ms: int = 3000) -> None:
                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
 
-def afficher(fenetre: gui.Window, question: tuple) -> None:
+def afficher(fenetre: gui.Window, question: tuple, reponses: tuple) -> None:
     """afficher la question"""
 
     fenetre[QUESTION].update(question[0])
-    reponses = melanger_reponses((question[1], question[2]))
     fenetre[BOUTON_GAUCHE].update(reponses[0], disabled=False, visible=True)
     fenetre[OU].update(text_color='white')
     fenetre[BOUTON_DROIT].update(reponses[1], disabled=False, visible=True)
@@ -229,28 +230,41 @@ def afficher(fenetre: gui.Window, question: tuple) -> None:
 
 def programme_principal() -> None:
     """Fonction principale du programme"""
-    
+
     def nouvelle_partie() -> None:
         fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
         fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
+
+        nonlocal temps_restant
         temps_restant = difficulte_choisie.temps
         fenetre[TEMPS].update(str(temps_restant))
         fenetre.un_hide()
+
+        nonlocal questions
         questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
+
+        nonlocal reponses
+        reponses = melanger_reponses([(question[0][1], question[0][2]) for question in questions])
+
+        nonlocal prochaine_question
         prochaine_question = 0
 
+        nonlocal position_meilleure_tentative
+        position_meilleure_tentative = 0
+
     def fin_partie(est_un_echec: bool) -> None:
+        nonlocal decompte_actif
         decompte_actif = False
         fenetre.hide()
         effacer_question(fenetre)
         for i in range(difficulte_choisie.nombre_questions):
             fenetre[f'{INDICATEUR}-{i}'].update(data=IMAGES.indicateur_vide_base64())
-            
+
             if not est_un_echec:
                 questions[i][1] = Indicateur.VIDE
 
         musique_questions_controles.stop()
-        
+
         if est_un_echec:
             SON_FIN_PARTIE.play()
             splasher_echec()
@@ -262,7 +276,7 @@ def programme_principal() -> None:
 
         fenetre[BOUTON_ACTION].update(disabled=True, visible=False)
         fenetre[IMAGE_BOUTON_INACTIF].update(visible=True)
-        afficher(fenetre, questions[prochaine_question][0])
+        afficher(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
 
     # indique qu'il sagit des variables globales
     global difficulte_choisie
@@ -301,9 +315,16 @@ def programme_principal() -> None:
     # la musique qui sera joué en fond
     musique_questions = sa.WaveObject.from_wave_file(musique_choisie.chemin_fichier)
 
+    # Choisir 21 questions aléatoirement
+    questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
+
+    # Liste avec un tuple de reponses pour chaque question
+    reponses = melanger_reponses([(question[0][1], question[0][2]) for question in questions])
+
     fenetre = fenetre_de_jeu()
     temps_restant = difficulte_choisie.temps
     prochaine_question = 0
+    position_meilleure_tentative = 0
     decompte_actif = False
 
     quitter = False
@@ -313,7 +334,7 @@ def programme_principal() -> None:
 
         # Si le décompte est actif, on diminue le temps restant et on met à jour le UI
         if decompte_actif:
-            
+
             dernier_temps = temps_actuel
             temps_actuel = round(time.time())
 
@@ -324,22 +345,18 @@ def programme_principal() -> None:
 
                 # Si le temps est écoulé, affiche l'écran d'échec
                 if temps_restant == 0:
-                    
                     # arrete la partie
                     fin_partie(True)
-                    
+
                     # On réaffiche le jeu de début
                     nouvelle_partie()
 
         # Si on clique sur le bouton pour commencer le jeu, on affiche les questions
         if event == BOUTON_ACTION:
-            
+
             # set le temps
             temps_actuel = round(time.time())
             decompte_actif = True
-
-            # Choisir 21 questions aléatoirement
-            questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
 
             # commencer la partie
             commencer()
@@ -352,19 +369,19 @@ def programme_principal() -> None:
 
             # Si le joueur a choisi la bonne réponse
             if (event == BOUTON_GAUCHE and fenetre[BOUTON_GAUCHE].get_text() != questions[prochaine_question][0][1]) or \
-               (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
-                
+                    (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
+
                 fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=IMAGES.indicateur_vert_base64())
                 questions[prochaine_question][1] = Indicateur.VERT
                 prochaine_question += 1
-                
+
                 if prochaine_question < difficulte_choisie.nombre_questions:
-                    afficher(fenetre, questions[prochaine_question][0])
+                    afficher(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
 
                 # quand le joueur gagne
                 elif difficulte_choisie.nombre_questions <= prochaine_question:
                     fin_partie(False)
-                    
+
                     prochaine_question = 0
 
                     # On réaffiche le jeu de début
@@ -374,13 +391,18 @@ def programme_principal() -> None:
             else:
                 decompte_actif = False
                 effacer_question(fenetre)
+
                 for i in range(prochaine_question):
                     fenetre[f'{INDICATEUR}-{i}'].update(
                         data=IMAGES.indicateur_jaune_base64())
                     questions[i][1] = Indicateur.JAUNE
-                fenetre[f'{INDICATEUR}-{prochaine_question}'].update(
-                    data=IMAGES.indicateur_rouge_base64())
-                questions[prochaine_question][1] = Indicateur.ROUGE
+
+                if prochaine_question > position_meilleure_tentative or position_meilleure_tentative == 0:
+                    position_meilleure_tentative = prochaine_question
+                    fenetre[f'{INDICATEUR}-{position_meilleure_tentative}'].update(
+                        data=IMAGES.indicateur_rouge_base64())
+                    questions[position_meilleure_tentative][1] = Indicateur.ROUGE
+
                 prochaine_question = 0
                 fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
                 fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
@@ -396,4 +418,5 @@ def programme_principal() -> None:
     del fenetre
 
 
-programme_principal()
+if __name__ == '__main__':
+    programme_principal()
