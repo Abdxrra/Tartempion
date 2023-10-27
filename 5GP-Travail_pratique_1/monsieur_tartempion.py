@@ -221,12 +221,9 @@ def programme_principal() -> None:
     gui.theme('Black')
 
     # Charger des fichiers audio pour les effets sonores
-    son_victoire = sa.WaveObject.from_wave_file(
-        'audios/effet sonores/522243__dzedenz__result-10.wav')
-    son_erreur = sa.WaveObject.from_wave_file(
-        'audios/effet sonores/409282__wertstahl__syserr1v1-in_thy_face_short.wav')
-    son_fin_partie = sa.WaveObject.from_wave_file(
-        'audios/effet sonores/173859__jivatma07__j1game_over_mono.wav')
+    son_victoire = sa.WaveObject.from_wave_file('audios/effet sonores/522243__dzedenz__result-10.wav')
+    son_erreur = sa.WaveObject.from_wave_file('audios/effet sonores/409282__wertstahl__syserr1v1-in_thy_face_short.wav')
+    son_fin_partie = sa.WaveObject.from_wave_file('audios/effet sonores/173859__jivatma07__j1game_over_mono.wav')
 
     # Afficher un écran de démarrage pour l'équipe
     splasher_equipe(1500)

@@ -1,6 +1,5 @@
 import pickle
-from integrite import hash_fichier
-
+from modules.integrite import hash_fichier
 
 
 class Images:
@@ -10,7 +9,7 @@ class Images:
         self.chemin_fichier_pickle = chemin_fichier_pickle
         
         if self.verifier_integrite():
-            return "le fichier d'iamge a été modifié"
+            print("le fichier d'iamge a été modifié")
 
         self.charger_fichier()
 
