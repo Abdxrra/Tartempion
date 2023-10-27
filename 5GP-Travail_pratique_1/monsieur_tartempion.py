@@ -286,7 +286,7 @@ def programme_principal() -> None:
                     afficher(fenetre, questions[prochaine_question][0])
 
                 # quand le joueur gagne
-                elif 21 <= prochaine_question:
+                elif difficulte_choisie.nombre_questions <= prochaine_question:
                     decompte_actif = False
                     fenetre.hide()
                     effacer_question_affichee(fenetre)
