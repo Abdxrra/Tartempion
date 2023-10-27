@@ -32,13 +32,14 @@ from modules.images import Images
 from modules.indicateurs import Indicateur
 from modules.difficulte import Difficulte
 from modules.musique import Musique
+from modules.questions import Questions
 
 DIFFICULTE = [
     Difficulte("SUPER FACILE", 10, 60),
     Difficulte("FACILE", 15, 60),
     Difficulte("MOYEN", 21, 60),
     Difficulte("DIFFICILE", 30, 60),
-    Difficulte("TRÈS DIFFICILE", 30, 45)
+    Difficulte("TRÈS DIFFICILE", 30, 1)
 ]
 
 MUSIQUES = [
@@ -63,6 +64,11 @@ OU = 'OU'
 
 BOUTON_GAUCHE = 'BOUTON_GAUCHE'
 BOUTON_DROIT = 'BOUTON_DROIT'
+BOUTON_COMMENCER = 'BOUTON_COMMENCER'
+BOUTON_QUITTER = 'BOUTON_QUITTER'
+COMBO_DIFFICULTE = 'COMBO_DIFFICULTE'
+COMBO_MUSIQUE = 'COMBO_MUSIQUE'
+
 
 QUESTION = 'QUESTION'
 INDICATEUR = 'INDICATEUR'
@@ -80,42 +86,42 @@ police_reponses: tuple = (gui.DEFAULT_FONT, 20, 'normal')
 police_ou: tuple = (gui.DEFAULT_FONT, 20, 'italic')
 
 
-def hash_fichier(chemin_fichier) -> str:
+# def hash_fichier(chemin_fichier) -> str:
     
-    sha256 = hashlib.sha256()
+#     sha256 = hashlib.sha256()
 
-    with open(chemin_fichier, 'rb') as f:
-        while True:
-            donnee = f.read(BUF_SIZE)
-            if not donnee:
-                break
+#     with open(chemin_fichier, 'rb') as f:
+#         while True:
+#             donnee = f.read(BUF_SIZE)
+#             if not donnee:
+#                 break
             
-            sha256.update(donnee)
+#             sha256.update(donnee)
 
-    return sha256.hexdigest()
+#     return sha256.hexdigest()
 
-def calculate_sha256_checksum(file_path):
-    sha256_hash = hashlib.sha256()
-    with open(file_path, 'rb') as file:
-        while True:
-            data = file.read(65536)  # Read in 64 KB blocks
-            if not data:
-                break
-            sha256_hash.update(data)
-    return sha256_hash.hexdigest()
+# def calculate_sha256_checksum(file_path):
+#     sha256_hash = hashlib.sha256()
+#     with open(file_path, 'rb') as file:
+#         while True:
+#             data = file.read(65536)  # Read in 64 KB blocks
+#             if not data:
+#                 break
+#             sha256_hash.update(data)
+#     return sha256_hash.hexdigest()
 
 def afficher_menu() -> None:
     """Afficher le menu"""
 
     difficulte_selection = gui.Combo(
-        DIFFICULTE, DIFFICULTE[2], font=police_reponses, enable_events=True,  readonly=True, key='COMBO_DIFFICULTE')
+        DIFFICULTE, DIFFICULTE[2], font=police_reponses, enable_events=True,  readonly=True, key=COMBO_DIFFICULTE)
 
     musique_selection = gui.Combo(MUSIQUES, musique_choisie, font=police_reponses,
-                                  enable_events=True,  readonly=True, key='COMBO_MUSIQUE')
+                                  enable_events=True,  readonly=True, key=COMBO_MUSIQUE)
 
-    commencer = gui.Button("COMMENCER", key='BOUTON-COMMENCER', font=police_reponses,
+    commencer = gui.Button("COMMENCER", key=BOUTON_COMMENCER, font=police_reponses,
                            button_color=('white', gui.theme_background_color()), border_width=0)
-    quitter = gui.Button("QUITTER", key='BOUTON-QUITTER', font=police_reponses,
+    quitter = gui.Button("QUITTER", key=BOUTON_QUITTER, font=police_reponses,
                          button_color=('white', gui.theme_background_color()), border_width=0)
 
     design = [
@@ -188,58 +194,23 @@ def effacer_question(fenetre: gui.Window) -> None:
     fenetre[BOUTON_DROIT].update('', disabled=True, visible=True)
 
 
-# def charger_questions(fichier_db: str) -> list:
-#     """charge les question depuis le fichier BD"""
-#     try:
-#         db_checksum = calculate_sha256_checksum(fichier_db)
-#         if db_checksum != CHECKSUM_CONTROL:
-#             print("Checksum n'est pas le même.")
-#             return False
-
-#         # Établir une connexion à la base de données
-#         connexion = squirrel.connect(fichier_db)
-#         cursor = connexion.cursor()
-#         cursor.execute("PRAGMA integrity_check;")
-#         result = cursor.fetchone()
-
-#         if result and result[0] == "ok":
-#             with connexion:
-                
-#                 # Exécuter une requête SQL pour obtenir les questions et réponses    
-#                 resultat_requete = connexion.execute('SELECT question, reponse_exacte, reponse_erronee FROM QUESTIONS')
-#                 questions = [(enregistrement[0], enregistrement[1], enregistrement[2]) for enregistrement in resultat_requete]
-
-#                 #fermer la connection
-#                 connexion.close()
-
-#                 # Retourner les enregistrements sous forme de liste
-#                 return questions
-
-#         else:
-#             print("Intégrité corrompue")
-#             return False
-#     except Exception as e:
-#         print(f"Erreur durant la vérification de l'intégrité: {str(e)}")
-#         return False
-
-
-def melanger_reponses(reponses: tuple) -> tuple:
+def melanger_reponses(reponses: list) -> list:
     """fonction pour mélanger les réponses"""
-    for position_couple_reponses in range(len(reponses)):
-        reponses[position_couple_reponses] = (reponses[position_couple_reponses][0], reponses[position_couple_reponses][1]) \
-            if bool(random.getrandbits(1)) else (reponses[position_couple_reponses][1], reponses[position_couple_reponses][0])
 
-    return reponses
+    reponses = list(reponses)
+    random.shuffle(reponses)
+
+    return reponses[::-1]
 
 
-def splasher_echec(temps_ms: int) -> None:
+def splasher_echec(temps_ms: int = 3000) -> None:
     """afficher un écran d'échec"""
 
     gui.Window(TITRE, [[gui.Image(data=IMAGES.echec_base64())]], transparent_color=gui.theme_background_color(),
                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
 
-def splasher_succes(temps_ms: int) -> None:
+def splasher_succes(temps_ms: int = 3000) -> None:
     """afficher quand le joueur gagne"""
 
     gui.Window(TITRE, [[gui.Image(data=IMAGES.succes_base64())]], transparent_color="maroon2",
@@ -261,14 +232,14 @@ def programme_principal() -> None:
     
     def nouvelle_partie() -> None:
         fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
-                    fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
-                    temps_restant = difficulte_choisie.temps
-                    fenetre[TEMPS].update(str(temps_restant))
-                    fenetre.un_hide()
-                    questions = choisir_questions(toutes_les_questions, difficulte_choisie.nombre_questions)
-                    prochaine_question = 0
-                    
-    def fin_partie(est_un_echec: Bool) -> None:
+        fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
+        temps_restant = difficulte_choisie.temps
+        fenetre[TEMPS].update(str(temps_restant))
+        fenetre.un_hide()
+        questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
+        prochaine_question = 0
+
+    def fin_partie(est_un_echec: bool) -> None:
         decompte_actif = False
         fenetre.hide()
         effacer_question(fenetre)
@@ -282,13 +253,17 @@ def programme_principal() -> None:
         
         if est_un_echec:
             SON_FIN_PARTIE.play()
-            splasher_echec(3000)
+            splasher_echec()
         else:
             SON_VICTOIRE.play()
             splasher_succes()
-        
-        
-    
+
+    def commencer() -> None:
+
+        fenetre[BOUTON_ACTION].update(disabled=True, visible=False)
+        fenetre[IMAGE_BOUTON_INACTIF].update(visible=True)
+        afficher(fenetre, questions[prochaine_question][0])
+
     # indique qu'il sagit des variables globales
     global difficulte_choisie
     global musique_choisie
@@ -302,33 +277,29 @@ def programme_principal() -> None:
     # Afficher un écran de démarrage pour le titre
     splasher_titre(2000, True)
 
-    # Choisir 21 questions aléatoirement
-    questions = choisir_questions(toutes_les_questions, 21)
-
     fenetre_menu = afficher_menu()
     menu_boucle = True
 
     while menu_boucle:
         event, values = fenetre_menu.read(timeout=10)
-        print(event)
+
         match event:
-            case 'BOUTON-COMMENCER':
+            case 'BOUTON_COMMENCER':
                 menu_boucle = False
                 fenetre_menu.close()
                 del fenetre_menu
 
-            case 'BOUTON-QUITTER' | gui.WIN_CLOSED:
+            case 'BOUTON_QUITTER' | gui.WIN_CLOSED:
                 return
 
             case 'COMBO_DIFFICULTE':
-                difficulte_choisie = values['COMBO_DIFFICULTE']
+                difficulte_choisie = values[COMBO_DIFFICULTE]
 
             case 'COMBO_MUSIQUE':
-                musique_choisie = values['COMBO_MUSIQUE']
+                musique_choisie = values[COMBO_MUSIQUE]
 
-    # met la musique ici pour actualiser
-    musique_questions = sa.WaveObject.from_wave_file(
-        musique_choisie.chemin_fichier)
+    # la musique qui sera joué en fond
+    musique_questions = sa.WaveObject.from_wave_file(musique_choisie.chemin_fichier)
 
     fenetre = fenetre_de_jeu()
     temps_restant = difficulte_choisie.temps
@@ -342,25 +313,38 @@ def programme_principal() -> None:
 
         # Si le décompte est actif, on diminue le temps restant et on met à jour le UI
         if decompte_actif:
+            
             dernier_temps = temps_actuel
             temps_actuel = round(time.time())
+
             if dernier_temps != temps_actuel:
                 temps_restant -= 1
+                print(temps_restant)
                 fenetre[TEMPS].update(str(temps_restant))
 
                 # Si le temps est écoulé, affiche l'écran d'échec
                 if temps_restant == 0:
+                    
+                    # arrete la partie
                     fin_partie(True)
+                    
                     # On réaffiche le jeu de début
                     nouvelle_partie()
 
         # Si on clique sur le bouton pour commencer le jeu, on affiche les questions
         if event == BOUTON_ACTION:
-            fenetre[BOUTON_ACTION].update(disabled=True, visible=False)
-            fenetre[IMAGE_BOUTON_INACTIF].update(visible=True)
+            
+            # set le temps
             temps_actuel = round(time.time())
             decompte_actif = True
-            afficher(fenetre, questions[prochaine_question][0])
+
+            # Choisir 21 questions aléatoirement
+            questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
+
+            # commencer la partie
+            commencer()
+
+            # controleur de la musique qui joue
             musique_questions_controles = musique_questions.play()
 
         # Si on clique sur une des deux réponses (gauche ou droite)
@@ -369,10 +353,11 @@ def programme_principal() -> None:
             # Si le joueur a choisi la bonne réponse
             if (event == BOUTON_GAUCHE and fenetre[BOUTON_GAUCHE].get_text() != questions[prochaine_question][0][1]) or \
                (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
-                fenetre[f'{INDICATEUR}-{prochaine_question}'].update(
-                    data=IMAGES.indicateur_vert_base64())
+                
+                fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=IMAGES.indicateur_vert_base64())
                 questions[prochaine_question][1] = Indicateur.VERT
                 prochaine_question += 1
+                
                 if prochaine_question < difficulte_choisie.nombre_questions:
                     afficher(fenetre, questions[prochaine_question][0])
 
@@ -380,6 +365,8 @@ def programme_principal() -> None:
                 elif difficulte_choisie.nombre_questions <= prochaine_question:
                     fin_partie(False)
                     
+                    prochaine_question = 0
+
                     # On réaffiche le jeu de début
                     nouvelle_partie()
 

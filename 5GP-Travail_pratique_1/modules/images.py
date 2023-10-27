@@ -8,8 +8,8 @@ class Images:
         self.integrite = "511f7dc94ed40ce2d033570b5ea3f9b90c2c348151ae1035621fdcc711176393"
         self.chemin_fichier_pickle = chemin_fichier_pickle
         
-        if self.verifier_integrite():
-            print("le fichier d'iamge a été modifié")
+        if not self.verifier_integrite():
+            print("le fichier d'images a été modifié")
 
         self.charger_fichier()
 
