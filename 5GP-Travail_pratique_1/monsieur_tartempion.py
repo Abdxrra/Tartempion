@@ -21,11 +21,12 @@ Ressources sous licences:
   Licence: https://creativecommons.org/licenses/by-nc/4.0/
 """
 
-import random
+import random, sys
 import simpleaudio as sa
 import time
 import sqlite3 as squirrel
 import PySimpleGUI as gui
+import hashlib
 
 from images import *
 from indicateurs import Indicateur
@@ -51,6 +52,7 @@ QUESTION = 'QUESTION'
 BOUTON_ACTION = 'BOUTON_ACTION'
 IMAGE_BOUTON_INACTIF = 'IMAGE_BOUTON_INACTIF'
 INDICATEUR = 'INDICATEUR'
+CHECKSUM_CONTROL = 'e237901780d71b2b0cf938819afb2e1a398339f45686b218b11fb31e062e550d'
 
 # Définir les styles de police pour différents éléments
 police_titre: tuple = (gui.DEFAULT_FONT, 40, 'italic')
@@ -111,17 +113,39 @@ def effacer_question_affichee(fenetre: gui.Window) -> None:
     fenetre[BOUTON_DROIT].update('', disabled=True, visible=True)
 
 
-# Définition d'une fonction pour charger les questions à partir d'une base de données
+def calculate_sha256_checksum(file_path):
+    sha256_hash = hashlib.sha256()
+    with open(file_path, 'rb') as file:
+        while True:
+            data = file.read(65536)  # Read in 64 KB blocks
+            if not data:
+                break
+            sha256_hash.update(data)
+    return sha256_hash.hexdigest()
+
 def charger_questions(fichier_db: str) -> list:
-    # Établir une connexion à la base de données
-    connexion = squirrel.connect(fichier_db)
+    try:
+        db_checksum = calculate_sha256_checksum(fichier_db)
+        if db_checksum != CHECKSUM_CONTROL:
+            print("Checksum n'est pas le même.")
+            return False
 
-    # Exécuter une requête SQL pour obtenir les questions et réponses
-    with connexion:
-        resultat_requete = connexion.execute('SELECT question, reponse_exacte, reponse_erronee FROM QUESTIONS')
+        connexion = squirrel.connect(fichier_db)
+        cursor = connexion.cursor()
+        cursor.execute("PRAGMA integrity_check;")
+        result = cursor.fetchone()
 
-    # Retourner les enregistrements sous forme de liste
-    return [(enregistrement[0], enregistrement[1], enregistrement[2]) for enregistrement in resultat_requete]
+        if result and result[0] == "ok":
+            with connexion:
+                resultat_requete = connexion.execute('SELECT question, reponse_exacte, reponse_erronee FROM QUESTIONS')
+                return [(enregistrement[0], enregistrement[1], enregistrement[2]) for enregistrement in resultat_requete]
+        else:
+            print("Intégrité corrompue")
+            return False
+    except Exception as e:
+        print(f"Erreur durant la vérification de l'intégrité: {str(e)}")
+        return False
+
 
 # Définition d'une fonction pour choisir un certain nombre de questions parmi une banque de questions
 def choisir_questions(banque: list, nombre: int) -> list:
@@ -131,7 +155,8 @@ def choisir_questions(banque: list, nombre: int) -> list:
 def melanger_reponses(reponses: list) -> list:
     # Cette boucle va iterer a travers chaque couple de reponses dans la liste
     for position_couple_reponses in range(len(reponses)):
-        reponses[position_couple_reponses] = (reponses[position_couple_reponses][0], reponses[position_couple_reponses][1]) if bool(random.getrandbits(1)) else (reponses[position_couple_reponses][1], reponses[position_couple_reponses][0])
+        reponses[position_couple_reponses] = (reponses[position_couple_reponses][0], reponses[position_couple_reponses][1]) \
+        if bool(random.getrandbits(1)) else (reponses[position_couple_reponses][1], reponses[position_couple_reponses][0])
     return reponses
 
 # Définition d'une fonction pour afficher un écran d'échec
@@ -164,6 +189,7 @@ def effacer_question(fenetre: gui.Window) -> None:
 def obtenir_activite_decompte():
     return decompte_actif
 
+# Fonction pour fermer le programme et la fenêtre
 def fermer_programme(fenetre):
     fenetre.close()
     del fenetre
@@ -201,6 +227,7 @@ def programme_principal() -> None:
     temps_restant = TEMPS_EPREUVE
     prochaine_question = 0
     decompte_actif = False
+    quitter = False
 
     # position de la question echouee lors de la meilleure tentative
     position_meilleure_tentative = 0
@@ -227,7 +254,6 @@ def programme_principal() -> None:
         nonlocal position_meilleure_tentative
         position_meilleure_tentative = 0
 
-    quitter = False
     # Tant qu'on ne quitte pas le jeu, fait cela
     while not quitter:
         event, valeurs = fenetre.read(timeout=10)
