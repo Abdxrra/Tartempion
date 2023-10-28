@@ -47,7 +47,7 @@ class Partie:
 
         self.images = images
         self.questions = Questions().choisir_questions(self.difficulte_choisie.nombre_questions)
-        self.reponses = self.__melanger_reponses()
+        self.reponses = self._melanger_reponses()
 
         self.decompte_actif = False
 
@@ -56,9 +56,9 @@ class Partie:
         self.prochaine_question = 0
         self.position_meilleure_tentative = 0
 
-        self.fenetre = self.__fenetre_de_jeu()
+        self.fenetre = self._fenetre_de_jeu()
 
-    def __fenetre_de_jeu(self) -> gui.Window:
+    def _fenetre_de_jeu(self) -> gui.Window:
         """Afficher l'interface du jeu"""
 
         temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')], [
@@ -88,7 +88,7 @@ class Partie:
 
         return fenetre
 
-    def __melanger_reponses(self) -> list:
+    def _melanger_reponses(self) -> list:
         """fonction pour mélanger les réponses"""
 
         reponses = [(question[0][1], question[0][2]) for question in self.questions]
@@ -129,7 +129,7 @@ class Partie:
         self.fenetre[OU].update(text_color=gui.theme_background_color())
         self.fenetre[BOUTON_DROIT].update('', disabled=True, visible=True)
 
-    def __fin_partie(self, est_un_echec: bool) -> None:
+    def _fin_partie(self, est_un_echec: bool) -> None:
 
         self.decompte_actif = False
         self.fenetre.hide()
@@ -186,7 +186,7 @@ class Partie:
                     # Si le temps est écoulé, affiche l'écran d'échec
                     if self.temps_restant == 0:
                         # arrete la partie
-                        self.__fin_partie(True)
+                        self._fin_partie(True)
 
 
             # Si on clique sur le bouton pour commencer le jeu, on affiche les questions
@@ -219,7 +219,7 @@ class Partie:
 
                     # quand le joueur gagne
                     elif self.difficulte_choisie.nombre_questions <= self.prochaine_question:
-                        self.__fin_partie(False)
+                        self._fin_partie(False)
 
                 # Sinon, le joueur a choisi la mauvaise réponse
                 else:
