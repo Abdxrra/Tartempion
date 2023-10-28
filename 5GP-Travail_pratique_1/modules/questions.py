@@ -3,6 +3,7 @@ import sqlite3 as squirrel
 from .integrite import hash_fichier
 from .indicateurs import Indicateur
 
+
 class Questions:
 
     def __init__(self) -> None:

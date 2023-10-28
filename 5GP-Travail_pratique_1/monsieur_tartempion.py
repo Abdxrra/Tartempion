@@ -32,6 +32,7 @@ from modules.indicateurs import Indicateur
 from modules.difficulte import Difficulte
 from modules.musique import Musique
 from modules.questions import Questions
+from modules.partie import Partie
 
 DIFFICULTE = [
     Difficulte("SUPER FACILE", 10, 60),
@@ -137,6 +138,7 @@ def fenetre_menu() -> gui.Window:
                          element_justification='center', resizable=False, finalize=True, size=(500, 280))
 
     return fenetre
+
 
 def afficher_menu() -> None:
     fenetre = fenetre_menu()
@@ -251,173 +253,178 @@ def afficher_question(fenetre: gui.Window, question: tuple, reponses: tuple) -> 
 def programme_principal() -> None:
     """Fonction principale du programme"""
 
-    def nouvelle_partie() -> None:
-        fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
-        fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
+    # def nouvelle_partie() -> None:
+    #     fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
+    #     fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
+    #
+    #     nonlocal temps_restant
+    #     temps_restant = difficulte_choisie.temps
+    #     fenetre[TEMPS].update(str(temps_restant))
+    #     fenetre.un_hide()
+    #
+    #     nonlocal questions
+    #     questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
+    #
+    #     nonlocal reponses
+    #     reponses = melanger_reponses([(question[0][1], question[0][2]) for question in questions])
+    #
+    #     nonlocal prochaine_question
+    #     prochaine_question = 0
+    #
+    #     nonlocal position_meilleure_tentative
+    #     position_meilleure_tentative = 0
+    #
+    # def fin_partie(est_un_echec: bool) -> None:
+    #     nonlocal decompte_actif
+    #     decompte_actif = False
+    #     fenetre.hide()
+    #     effacer_question(fenetre)
+    #     for i in range(difficulte_choisie.nombre_questions):
+    #         fenetre[f'{INDICATEUR}-{i}'].update(data=IMAGES.indicateur_vide_base64())
+    #
+    #         if not est_un_echec:
+    #             questions[i][1] = Indicateur.VIDE
+    #
+    #     musique_questions_controles.stop()
+    #
+    #     if est_un_echec:
+    #         SON_FIN_PARTIE.play()
+    #         splasher_echec()
+    #     else:
+    #         SON_VICTOIRE.play()
+    #         splasher_succes()
+    #
+    # def commencer() -> None:
+    #
+    #     fenetre[BOUTON_ACTION].update(disabled=True, visible=False)
+    #     fenetre[IMAGE_BOUTON_INACTIF].update(visible=True)
+    #     afficher_question(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
+    #
+    # # indique qu'il sagit des variables globales
+    # global difficulte_choisie
+    # global musique_choisie
+    #
+    # # Changer le thème principal
+    # gui.theme('Black')
+    #
+    # # Afficher un écran de démarrage pour l'équipe
+    # splasher_equipe(1500)
+    #
+    # # Afficher un écran de démarrage pour le titre
+    # splasher_titre(2000, True)
+    #
+    # # Affichage du menu avant de commencer la partie
+    # afficher_menu()
+    #
+    # # la musique qui sera joué en fond
+    # musique_questions = sa.WaveObject.from_wave_file(musique_choisie.chemin_fichier)
+    #
+    # # Choisir 21 questions aléatoirement
+    # questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
+    #
+    # # Liste avec un tuple de reponses pour chaque question
+    # reponses = melanger_reponses([(question[0][1], question[0][2]) for question in questions])
+    #
+    # fenetre = fenetre_de_jeu()
+    # temps_restant = difficulte_choisie.temps
+    # prochaine_question = 0
+    # position_meilleure_tentative = 0
+    # decompte_actif = False
+    #
+    # quitter = False
+    # # Tant qu'on ne quitte pas le jeu, fait cela
+    # while not quitter:
+    #     event, valeurs = fenetre.read(timeout=10)
+    #
+    #     # Si le décompte est actif, on diminue le temps restant et on met à jour le UI
+    #     if decompte_actif:
+    #
+    #         dernier_temps = temps_actuel
+    #         temps_actuel = round(time.time())
+    #
+    #         if dernier_temps != temps_actuel:
+    #             temps_restant -= 1
+    #             print(temps_restant)
+    #             fenetre[TEMPS].update(str(temps_restant))
+    #
+    #             # Si le temps est écoulé, affiche l'écran d'échec
+    #             if temps_restant == 0:
+    #                 # arrete la partie
+    #                 fin_partie(True)
+    #
+    #                 # On réaffiche le jeu de début
+    #                 nouvelle_partie()
+    #
+    #     # Si on clique sur le bouton pour commencer le jeu, on affiche les questions
+    #     if event == BOUTON_ACTION:
+    #
+    #         # set le temps
+    #         temps_actuel = round(time.time())
+    #         decompte_actif = True
+    #
+    #         # commencer la partie
+    #         commencer()
+    #
+    #         # controleur de la musique qui joue
+    #         musique_questions_controles = musique_questions.play()
+    #
+    #     # Si on clique sur une des deux réponses (gauche ou droite)
+    #     elif event == BOUTON_GAUCHE or event == BOUTON_DROIT:
+    #
+    #         # Si le joueur a choisi la bonne réponse
+    #         if (event == BOUTON_GAUCHE and fenetre[BOUTON_GAUCHE].get_text() != questions[prochaine_question][0][1]) or \
+    #                 (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
+    #
+    #             fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=IMAGES.indicateur_vert_base64())
+    #             questions[prochaine_question][1] = Indicateur.VERT
+    #             prochaine_question += 1
+    #
+    #             if prochaine_question < difficulte_choisie.nombre_questions:
+    #                 afficher_question(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
+    #
+    #             # quand le joueur gagne
+    #             elif difficulte_choisie.nombre_questions <= prochaine_question:
+    #                 fin_partie(False)
+    #
+    #                 prochaine_question = 0
+    #
+    #                 # On réaffiche le jeu de début
+    #                 nouvelle_partie()
+    #
+    #         # Sinon, le joueur a choisi la mauvaise réponse
+    #         else:
+    #             decompte_actif = False
+    #             effacer_question(fenetre)
+    #
+    #             for i in range(prochaine_question):
+    #                 fenetre[f'{INDICATEUR}-{i}'].update(
+    #                     data=IMAGES.indicateur_jaune_base64())
+    #                 questions[i][1] = Indicateur.JAUNE
+    #
+    #             if prochaine_question > position_meilleure_tentative or position_meilleure_tentative == 0:
+    #                 position_meilleure_tentative = prochaine_question
+    #                 fenetre[f'{INDICATEUR}-{position_meilleure_tentative}'].update(
+    #                     data=IMAGES.indicateur_rouge_base64())
+    #                 questions[position_meilleure_tentative][1] = Indicateur.ROUGE
+    #
+    #             prochaine_question = 0
+    #             fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
+    #             fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
+    #             SON_ERREUR.play()
+    #             musique_questions_controles.stop()
+    #
+    #     # Si on ferme le jeu
+    #     elif event == gui.WIN_CLOSED:
+    #         decompte_actif = False
+    #         quitter = True
+    #
+    # fenetre.close()
+    # del fenetre
 
-        nonlocal temps_restant
-        temps_restant = difficulte_choisie.temps
-        fenetre[TEMPS].update(str(temps_restant))
-        fenetre.un_hide()
-
-        nonlocal questions
-        questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
-
-        nonlocal reponses
-        reponses = melanger_reponses([(question[0][1], question[0][2]) for question in questions])
-
-        nonlocal prochaine_question
-        prochaine_question = 0
-
-        nonlocal position_meilleure_tentative
-        position_meilleure_tentative = 0
-
-    def fin_partie(est_un_echec: bool) -> None:
-        nonlocal decompte_actif
-        decompte_actif = False
-        fenetre.hide()
-        effacer_question(fenetre)
-        for i in range(difficulte_choisie.nombre_questions):
-            fenetre[f'{INDICATEUR}-{i}'].update(data=IMAGES.indicateur_vide_base64())
-
-            if not est_un_echec:
-                questions[i][1] = Indicateur.VIDE
-
-        musique_questions_controles.stop()
-
-        if est_un_echec:
-            SON_FIN_PARTIE.play()
-            splasher_echec()
-        else:
-            SON_VICTOIRE.play()
-            splasher_succes()
-
-    def commencer() -> None:
-
-        fenetre[BOUTON_ACTION].update(disabled=True, visible=False)
-        fenetre[IMAGE_BOUTON_INACTIF].update(visible=True)
-        afficher_question(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
-
-    # indique qu'il sagit des variables globales
-    global difficulte_choisie
-    global musique_choisie
-
-    # Changer le thème principal
     gui.theme('Black')
-
-    # Afficher un écran de démarrage pour l'équipe
-    splasher_equipe(1500)
-
-    # Afficher un écran de démarrage pour le titre
-    splasher_titre(2000, True)
-
-    # Affichage du menu avant de commencer la partie
     afficher_menu()
-
-    # la musique qui sera joué en fond
-    musique_questions = sa.WaveObject.from_wave_file(musique_choisie.chemin_fichier)
-
-    # Choisir 21 questions aléatoirement
-    questions = QUESTIONS.choisir_questions(difficulte_choisie.nombre_questions)
-
-    # Liste avec un tuple de reponses pour chaque question
-    reponses = melanger_reponses([(question[0][1], question[0][2]) for question in questions])
-
-    fenetre = fenetre_de_jeu()
-    temps_restant = difficulte_choisie.temps
-    prochaine_question = 0
-    position_meilleure_tentative = 0
-    decompte_actif = False
-
-    quitter = False
-    # Tant qu'on ne quitte pas le jeu, fait cela
-    while not quitter:
-        event, valeurs = fenetre.read(timeout=10)
-
-        # Si le décompte est actif, on diminue le temps restant et on met à jour le UI
-        if decompte_actif:
-
-            dernier_temps = temps_actuel
-            temps_actuel = round(time.time())
-
-            if dernier_temps != temps_actuel:
-                temps_restant -= 1
-                print(temps_restant)
-                fenetre[TEMPS].update(str(temps_restant))
-
-                # Si le temps est écoulé, affiche l'écran d'échec
-                if temps_restant == 0:
-                    # arrete la partie
-                    fin_partie(True)
-
-                    # On réaffiche le jeu de début
-                    nouvelle_partie()
-
-        # Si on clique sur le bouton pour commencer le jeu, on affiche les questions
-        if event == BOUTON_ACTION:
-
-            # set le temps
-            temps_actuel = round(time.time())
-            decompte_actif = True
-
-            # commencer la partie
-            commencer()
-
-            # controleur de la musique qui joue
-            musique_questions_controles = musique_questions.play()
-
-        # Si on clique sur une des deux réponses (gauche ou droite)
-        elif event == BOUTON_GAUCHE or event == BOUTON_DROIT:
-
-            # Si le joueur a choisi la bonne réponse
-            if (event == BOUTON_GAUCHE and fenetre[BOUTON_GAUCHE].get_text() != questions[prochaine_question][0][1]) or \
-                    (event == BOUTON_DROIT and fenetre[BOUTON_DROIT].get_text() != questions[prochaine_question][0][1]):
-
-                fenetre[f'{INDICATEUR}-{prochaine_question}'].update(data=IMAGES.indicateur_vert_base64())
-                questions[prochaine_question][1] = Indicateur.VERT
-                prochaine_question += 1
-
-                if prochaine_question < difficulte_choisie.nombre_questions:
-                    afficher_question(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
-
-                # quand le joueur gagne
-                elif difficulte_choisie.nombre_questions <= prochaine_question:
-                    fin_partie(False)
-
-                    prochaine_question = 0
-
-                    # On réaffiche le jeu de début
-                    nouvelle_partie()
-
-            # Sinon, le joueur a choisi la mauvaise réponse
-            else:
-                decompte_actif = False
-                effacer_question(fenetre)
-
-                for i in range(prochaine_question):
-                    fenetre[f'{INDICATEUR}-{i}'].update(
-                        data=IMAGES.indicateur_jaune_base64())
-                    questions[i][1] = Indicateur.JAUNE
-
-                if prochaine_question > position_meilleure_tentative or position_meilleure_tentative == 0:
-                    position_meilleure_tentative = prochaine_question
-                    fenetre[f'{INDICATEUR}-{position_meilleure_tentative}'].update(
-                        data=IMAGES.indicateur_rouge_base64())
-                    questions[position_meilleure_tentative][1] = Indicateur.ROUGE
-
-                prochaine_question = 0
-                fenetre[BOUTON_ACTION].update(disabled=False, visible=True)
-                fenetre[IMAGE_BOUTON_INACTIF].update(visible=False)
-                SON_ERREUR.play()
-                musique_questions_controles.stop()
-
-        # Si on ferme le jeu
-        elif event == gui.WIN_CLOSED:
-            decompte_actif = False
-            quitter = True
-
-    fenetre.close()
-    del fenetre
+    partie = Partie(difficulte_choisie, musique_choisie, IMAGES)
+    partie.commencer()
 
 
 if __name__ == '__main__':
