@@ -108,7 +108,7 @@ police_ou: tuple = (gui.DEFAULT_FONT, 20, 'italic')
 #             sha256_hash.update(data)
 #     return sha256_hash.hexdigest()
 
-def afficher_menu() -> gui.Window:
+def fenetre_menu() -> gui.Window:
     """Afficher le menu"""
 
     difficulte_selection = gui.Combo(
@@ -138,6 +138,28 @@ def afficher_menu() -> gui.Window:
 
     return fenetre
 
+def afficher_menu() -> None:
+    fenetre = fenetre_menu()
+    menu_boucle = True
+
+    while menu_boucle:
+        event, values = fenetre.read(timeout=10)
+
+        match event:
+            case 'BOUTON_COMMENCER':
+                menu_boucle = False
+                fenetre.close()
+                del fenetre
+
+            case 'BOUTON_QUITTER' | gui.WIN_CLOSED:
+                return
+
+            case 'COMBO_DIFFICULTE':
+                difficulte_choisie = values[COMBO_DIFFICULTE]
+
+            case 'COMBO_MUSIQUE':
+                musique_choisie = values[COMBO_MUSIQUE]
+
 
 def splasher_equipe(temps_ms: int) -> None:
     """Afficher le logo de l'équipe"""
@@ -155,8 +177,6 @@ def splasher_titre(delai: int, pardessus: bool) -> None:
 
 def fenetre_de_jeu() -> gui.Window:
     """Afficher l'interface du jeu"""
-
-    title = [gui.Text(TITRE, key='TITLE', font=police_title)]
 
     temps = [[gui.Text('Temps restant', font=police_etiquettes, size=70, justification='center')], [
         gui.Text(str(difficulte_choisie.temps), key=TEMPS, font=police_temps)]]
@@ -219,7 +239,7 @@ def splasher_succes(temps_ms: int = 3000) -> None:
                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
 
-def afficher(fenetre: gui.Window, question: tuple, reponses: tuple) -> None:
+def afficher_question(fenetre: gui.Window, question: tuple, reponses: tuple) -> None:
     """afficher la question"""
 
     fenetre[QUESTION].update(question[0])
@@ -276,7 +296,7 @@ def programme_principal() -> None:
 
         fenetre[BOUTON_ACTION].update(disabled=True, visible=False)
         fenetre[IMAGE_BOUTON_INACTIF].update(visible=True)
-        afficher(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
+        afficher_question(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
 
     # indique qu'il sagit des variables globales
     global difficulte_choisie
@@ -291,26 +311,8 @@ def programme_principal() -> None:
     # Afficher un écran de démarrage pour le titre
     splasher_titre(2000, True)
 
-    fenetre_menu = afficher_menu()
-    menu_boucle = True
-
-    while menu_boucle:
-        event, values = fenetre_menu.read(timeout=10)
-
-        match event:
-            case 'BOUTON_COMMENCER':
-                menu_boucle = False
-                fenetre_menu.close()
-                del fenetre_menu
-
-            case 'BOUTON_QUITTER' | gui.WIN_CLOSED:
-                return
-
-            case 'COMBO_DIFFICULTE':
-                difficulte_choisie = values[COMBO_DIFFICULTE]
-
-            case 'COMBO_MUSIQUE':
-                musique_choisie = values[COMBO_MUSIQUE]
+    # Affichage du menu avant de commencer la partie
+    afficher_menu()
 
     # la musique qui sera joué en fond
     musique_questions = sa.WaveObject.from_wave_file(musique_choisie.chemin_fichier)
@@ -376,7 +378,7 @@ def programme_principal() -> None:
                 prochaine_question += 1
 
                 if prochaine_question < difficulte_choisie.nombre_questions:
-                    afficher(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
+                    afficher_question(fenetre, questions[prochaine_question][0], reponses[prochaine_question])
 
                 # quand le joueur gagne
                 elif difficulte_choisie.nombre_questions <= prochaine_question:
