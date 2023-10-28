@@ -247,6 +247,9 @@ class Partie:
 
             # Si on ferme le jeu
             elif evenement == gui.WIN_CLOSED:
+                if self.musique_questions_controles:
+                    self.musique_questions_controles.stop()
+
                 self.decompte_actif = False
                 quitter = True
 
