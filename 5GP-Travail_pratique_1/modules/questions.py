@@ -7,11 +7,14 @@ from .indicateurs import Indicateur
 class Questions:
 
     def __init__(self) -> None:
-        self.hash_original = "e237901780d71b2b0cf938819afb2e1a398339f45686b218b11fb31e062e550d"
+        self.__hash_original = "d2ecbcf93b792e64d8642005b88e44e1adee72843c02272df2a5d982e4cf8152"
         self.chemin_fichier_bd = "questions.bd"
 
+        # check si l'integrité du fichier est compromise
+        self.integrite_compromise = False
+        
         if not self.verifier_integrite():
-            print("le fichier de questions a été modifié")
+            self.integrite_compromise = True
 
         self.banque_questions = self.charger_fichier()
 
@@ -39,4 +42,4 @@ class Questions:
     def verifier_integrite(self) -> bool:
         """Verifie l'integrité du fichier bd"""
 
-        return self.hash_original == hash_fichier(self.chemin_fichier_bd)
+        return self.__hash_original == hash_fichier(self.chemin_fichier_bd)

@@ -29,6 +29,7 @@ import PySimpleGUI as gui
 
 from modules.images import Images
 from modules.difficulte import Difficulte
+from modules.questions import Questions
 from modules.musique import Musique
 from modules.partie import Partie
 
@@ -54,8 +55,11 @@ class Jeu:
     def __init__(self, difficultes: list, musiques: list) -> None:
 
         self.difficultes = difficultes
-        self.musiques = musiques        
+        self.musiques = musiques
         self.images = Images()
+        self.questions = Questions()
+
+        self.integrite_compromise = self.images.integrite_compromise or self.questions.integrite_compromise
 
         self.quitter = False
         self.difficulte_choisie = self.difficultes[2]
@@ -134,9 +138,22 @@ class Jeu:
 
                 case 'COMBO_MUSIQUE':
                     self.musique_choisie = values[COMBO_MUSIQUE]
+    
+    def erreur_message_integrite(self, temps_ms) -> None:
+        """Affiche une alerte stipulant que l'integrité d'un des fichiers a été modifié"""
+        
+        gui.theme('DarkRed1')
+
+        gui.Window(TITRE, [[gui.Text("L'un des fichiers ressources a été modifié")]],
+                no_titlebar=True, keep_on_top=True).read(timeout=temps_ms, close=True)
 
     def demarrer_boucle_jeu(self) -> None:
         """Boucle principal du jeu"""
+
+        # verifie l'integrité, sinon affiche un message d'erreur et quitte le jeu
+        if self.integrite_compromise:
+            self.erreur_message_integrite(5000)
+            return
 
         # Afficher un écran de démarrage pour le logo de l'équipe
         self._splasher_equipe(1500)

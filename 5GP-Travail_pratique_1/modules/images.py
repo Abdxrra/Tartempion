@@ -5,11 +5,14 @@ from modules.integrite import hash_fichier
 class Images:
 
     def __init__(self, chemin_fichier_pickle="../images.pkl") -> None:
-        self.integrite = "511f7dc94ed40ce2d033570b5ea3f9b90c2c348151ae1035621fdcc711176393"
+        self.__hash_original = "511f7dc94ed40ce2d033570b5ea3f9b90c2c348151ae1035621fdcc711176393"
         self.chemin_fichier_pickle = chemin_fichier_pickle
         
+        # check si l'integrité du fichier est compromise
+        self.integrite_compromise = False
+
         if not self.verifier_integrite():
-            print("le fichier d'images a été modifié")
+            self.integrite_compromise = True
 
         self.charger_fichier()
 
@@ -60,4 +63,4 @@ class Images:
     def verifier_integrite(self) -> bool:
         """Verifie l'integrité du fichier pickle"""
 
-        return self.integrite == hash_fichier(self.chemin_fichier_pickle)
+        return self.__hash_original == hash_fichier(self.chemin_fichier_pickle)
